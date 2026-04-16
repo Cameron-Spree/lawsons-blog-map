@@ -819,9 +819,9 @@
                     <div class="manage-categories" style="display:block;">
                         ${missingPosts.map(p => {
                             const selectOptions = primaryCats.filter(c => c !== 'Uncategorised').map(c => 
-                                \`<option value="${esc(c)}">${esc(c)}</option>\`
+                                `<option value="${esc(c)}">${esc(c)}</option>`
                             ).join('');
-                            return \`
+                            return `
                             <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-light); padding:12px 0;">
                                 <div style="flex:1; padding-right:16px;">
                                     <strong>${esc(p.title)}</strong> <br>
@@ -834,7 +834,7 @@
                                     </select>
                                 </div>
                             </div>
-                            \`;
+                            `;
                         }).join('')}
                     </div>
                 </div>
