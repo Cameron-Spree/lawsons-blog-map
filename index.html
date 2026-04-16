@@ -254,10 +254,35 @@
                     <div class="table-controls" style="display:flex; gap:12px; margin-top:16px;">
                         <input type="text" id="matrix-search" class="input-styled" placeholder="Search posts…" style="flex:1;">
                         <select id="matrix-filter" class="input-styled" style="max-width:250px;">
-                            <option value="all">View: All Posts</option>
-                            <option value="missing-any">Missing on Any Site</option>
-                            <option value="missing-all">Missing on All Sites</option>
-                            <option value="live-all">Live Everywhere</option>
+                            <optgroup label="General Availability">
+                                <option value="all">View: All Posts</option>
+                                <option value="missing-any">Missing on Any Site</option>
+                                <option value="missing-all">Missing on All Sites</option>
+                                <option value="live-all">Live Everywhere</option>
+                            </optgroup>
+                            <optgroup label="Site Count">
+                                <option value="count-1">Live on exactly 1 site</option>
+                                <option value="count-2">Live on exactly 2 sites</option>
+                                <option value="count-3">Live on exactly 3 sites</option>
+                                <option value="count-4">Live on exactly 4 sites</option>
+                                <option value="count-5">Live on exactly 5 sites</option>
+                            </optgroup>
+                            <optgroup label="Site Specific (Live)">
+                                <option value="site-lawsons-live">Live on Lawsons</option>
+                                <option value="site-avs-live">Live on AVS Fencing</option>
+                                <option value="site-oxford-live">Live on Oxford Fencing</option>
+                                <option value="site-witham-live">Live on Witham Timber</option>
+                                <option value="site-landscape-live">Live on Landscape Centre</option>
+                                <option value="site-southill-live">Live on Southill Sawmills</option>
+                            </optgroup>
+                             <optgroup label="Site Specific (Missing)">
+                                <option value="site-lawsons-404">Missing on Lawsons</option>
+                                <option value="site-avs-404">Missing on AVS Fencing</option>
+                                <option value="site-oxford-404">Missing on Oxford Fencing</option>
+                                <option value="site-witham-404">Missing on Witham Timber</option>
+                                <option value="site-landscape-404">Missing on Landscape Centre</option>
+                                <option value="site-southill-404">Missing on Southill Sawmills</option>
+                            </optgroup>
                         </select>
                     </div>
                     <div id="matrix-progress-container" style="display:none; margin-top:16px;">
@@ -295,6 +320,6 @@
     </div>
 
     <script src="app.js"></script>
-    <div class="version-tag">v.1.08</div>
+    <div class="version-tag">v.1.09</div>
 </body>
 </html>

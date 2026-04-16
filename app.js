@@ -1035,9 +1035,22 @@
             'witham': 'Witham Timber', 'landscape': 'Landscape Centre', 'southill': 'Southill Sawmills'
         };
         storeKeys.forEach(k => {
-            thHtml += `<th>${storeNames[k] || k}</th>`;
+            thHtml += `<th data-store="${k}">${storeNames[k] || k}</th>`;
         });
         thead.innerHTML = thHtml;
+
+        // Add click listeners to headers for column filtering
+        thead.querySelectorAll('th[data-store]').forEach(th => {
+            th.style.cursor = 'pointer';
+            th.title = 'Click to filter for live posts on this site';
+            th.addEventListener('click', () => {
+                const filterEl = document.getElementById('matrix-filter');
+                if (filterEl) {
+                    filterEl.value = `site-${th.dataset.store}-live`;
+                    renderMatrix(filterEl.value, document.getElementById('matrix-search')?.value || '');
+                }
+            });
+        });
 
         // Filter posts
         let filtered = posts;
@@ -1054,13 +1067,27 @@
         } else if (filter === 'missing-all') {
             filtered = filtered.filter(p => {
                 const cache = matrixCache[p.slug] || {};
-                // If every checked store is false (but we must have checked at least one to be sure, or we assume null means haven't checked so don't hide)
                 return storeKeys.every(k => cache[k] === false);
             });
         } else if (filter === 'live-all') {
             filtered = filtered.filter(p => {
                 const cache = matrixCache[p.slug] || {};
                 return storeKeys.every(k => cache[k] === true);
+            });
+        } else if (filter.startsWith('count-')) {
+            const target = parseInt(filter.split('-')[1]);
+            filtered = filtered.filter(p => {
+                const cache = matrixCache[p.slug] || {};
+                const liveCount = storeKeys.reduce((acc, k) => acc + (cache[k] === true ? 1 : 0), 0);
+                return liveCount === target;
+            });
+        } else if (filter.startsWith('site-')) {
+            const parts = filter.split('-');
+            const siteKey = parts[1];
+            const status = parts[2]; // 'live' or '404'
+            filtered = filtered.filter(p => {
+                const cache = matrixCache[p.slug] || {};
+                return status === 'live' ? cache[siteKey] === true : cache[siteKey] === false;
             });
         }
 

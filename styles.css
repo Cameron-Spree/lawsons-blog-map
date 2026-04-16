@@ -1070,21 +1070,27 @@ body {
 }
 
 .matrix-status-cell {
-    font-size: 1.2rem;
-    font-family: monospace;
+    font-size: 1rem;
+    font-weight: 700;
 }
 
 .matrix-live {
-    color: var(--status-live);
+    color: #2e7d32;
+    background: rgba(46, 125, 50, 0.15);
+    border-radius: 4px;
+    padding: 4px 0;
 }
 
 .matrix-404 {
-    color: var(--status-404);
+    color: #c62828;
+    background: rgba(198, 40, 40, 0.1);
+    border-radius: 4px;
+    padding: 4px 0;
 }
 
 .matrix-pending {
     color: var(--text-muted);
-    opacity: 0.5;
+    opacity: 0.3;
 }
 
 /* ═══ VERSION TAG ═══ */
