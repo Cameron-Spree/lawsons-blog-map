@@ -579,6 +579,123 @@
         overlay.hidden = false;
     }
 
+    function renderFreshnessTimeline(data) {
+        const container = document.getElementById('freshness-timeline-chart');
+        if (!container) return;
+        container.innerHTML = '';
+
+        if (!data || data.length === 0) {
+            container.innerHTML = '<div style="display:flex; height:100%; align-items:center; justify-content:center; color:var(--text-muted);">No dated posts found for this view</div>';
+            return;
+        }
+
+        // Aggregate by month
+        const monthlyCounts = new Map();
+        data.forEach(p => {
+            const d = new Date(p.publishTimestamp);
+            const key = new Date(d.getFullYear(), d.getMonth(), 1).getTime();
+            monthlyCounts.set(key, (monthlyCounts.get(key) || 0) + 1);
+        });
+
+        // Fill gaps
+        const sortedKeys = Array.from(monthlyCounts.keys()).sort((a,b) => a - b);
+        const start = new Date(sortedKeys[0]);
+        const end = new Date(sortedKeys[sortedKeys.length - 1]);
+        const timelineData = [];
+        
+        for (let d = new Date(start); d <= end; d.setMonth(d.getMonth() + 1)) {
+            const time = new Date(d).getTime();
+            timelineData.push({
+                date: new Date(d),
+                count: monthlyCounts.get(time) || 0
+            });
+        }
+
+        const margin = { top: 30, right: 30, bottom: 40, left: 40 };
+        const width = container.clientWidth - margin.left - margin.right;
+        const height = container.clientHeight - margin.top - margin.bottom;
+
+        const svg = d3.select(container).append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        // Scales
+        const x = d3.scaleTime()
+            .domain(d3.extent(timelineData, d => d.date))
+            .range([0, width]);
+
+        const y = d3.scaleLinear()
+            .domain([0, d3.max(timelineData, d => d.count) * 1.1])
+            .range([height, 0]);
+
+        // Gradient
+        const defs = svg.append("defs");
+        const gradient = defs.append("linearGradient")
+            .attr("id", "area-gradient")
+            .attr("x1", "0%").attr("y1", "0%")
+            .attr("x2", "0%").attr("y2", "100%");
+        gradient.append("stop").attr("offset", "0%").attr("stop-color", "var(--primary)").attr("stop-opacity", 0.3);
+        gradient.append("stop").attr("offset", "100%").attr("stop-color", "var(--primary)").attr("stop-opacity", 0);
+
+        // Axes
+        svg.append("g")
+            .attr("class", "timeline-axis")
+            .attr("transform", `translate(0,${height})`)
+            .call(d3.axisBottom(x).ticks(6).tickFormat(d3.timeFormat("%b %y")));
+
+        svg.append("g")
+            .attr("class", "timeline-axis")
+            .call(d3.axisLeft(y).ticks(5));
+
+        // Area
+        const area = d3.area()
+            .x(d => x(d.date))
+            .y0(height)
+            .y1(d => y(d.count))
+            .curve(d3.curveMonotoneX);
+
+        svg.append("path")
+            .datum(timelineData)
+            .attr("class", "timeline-area")
+            .attr("d", area);
+
+        // Line
+        const line = d3.line()
+            .x(d => x(d.date))
+            .y(d => y(d.count))
+            .curve(d3.curveMonotoneX);
+
+        svg.append("path")
+            .datum(timelineData)
+            .attr("class", "timeline-line")
+            .attr("d", line);
+
+        // Tooltip
+        const tooltip = d3.select(container).append("div")
+            .attr("class", "chart-tooltip")
+            .style("opacity", 0);
+
+        // Dots
+        svg.selectAll(".timeline-dot")
+            .data(timelineData)
+            .enter().append("circle")
+            .attr("class", "timeline-dot")
+            .attr("cx", d => x(d.date))
+            .attr("cy", d => y(d.count))
+            .attr("r", 4)
+            .on("mouseover", (event, d) => {
+                tooltip.transition().duration(200).style("opacity", 1);
+                tooltip.html(`<strong>${d3.timeFormat("%B %Y")(d.date)}</strong><br>${d.count} blog uploads`)
+                    .style("left", (event.offsetX + 10) + "px")
+                    .style("top", (event.offsetY - 40) + "px");
+            })
+            .on("mouseout", () => {
+                tooltip.transition().duration(200).style("opacity", 0);
+            });
+    }
+
     // ───────────────────────────────────────
     //  RENDER: FRESHNESS
     // ───────────────────────────────────────
@@ -629,6 +746,8 @@
                 </div>
             </div>
         `;
+        
+        renderFreshnessTimeline(filteredPosts);
 
         listEl.innerHTML = filteredPosts.map(p => {
             const ageMs = now - p.publishTimestamp;

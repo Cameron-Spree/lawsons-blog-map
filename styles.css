@@ -1093,6 +1093,63 @@ body {
     opacity: 0.3;
 }
 
+/* ═══ TIMELINE CHART ═══ */
+.timeline-container {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    height: 280px;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+
+.timeline-axis text {
+    font-size: 11px;
+    fill: var(--text-muted);
+}
+
+.timeline-axis line, .timeline-axis path {
+    stroke: var(--border-light);
+}
+
+.timeline-area {
+    fill: url(#area-gradient);
+    opacity: 0.8;
+}
+
+.timeline-line {
+    stroke: var(--primary);
+    stroke-width: 3;
+    fill: none;
+}
+
+.timeline-dot {
+    fill: var(--primary);
+    stroke: var(--bg-surface);
+    stroke-width: 2;
+    transition: r 0.2s;
+}
+
+.timeline-dot:hover {
+    r: 6;
+}
+
+.chart-tooltip {
+    position: absolute;
+    padding: 10px 14px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    pointer-events: none;
+    font-size: 13px;
+    z-index: 100;
+    backdrop-filter: blur(8px);
+    transition: opacity 0.2s;
+}
+
 /* ═══ VERSION TAG ═══ */
 .version-tag {
     position: fixed;
