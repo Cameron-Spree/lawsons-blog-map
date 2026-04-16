@@ -3,31 +3,30 @@
    ═══════════════════════════════════════════ */
 
 :root {
-    /* Brand */
+    /* Brand - Constant across themes */
     --lawsons-green: #1B5E20;
     --lawsons-green-light: #2E7D32;
     --accent: #66BB6A;
-    --accent-glow: rgba(102, 187, 106, 0.25);
+    --accent-glow: rgba(102, 187, 106, 0.15);
 
-    /* Surface palette (dark mode) */
-    --bg-base: #0c0f14;
-    --bg-surface: #13171e;
-    --bg-elevated: #1a1f28;
-    --bg-card: #1e2430;
-    --bg-card-hover: #252c3a;
-    --border: rgba(255, 255, 255, 0.06);
-    --border-light: rgba(255, 255, 255, 0.1);
-
-    /* Text */
-    --text-primary: #f0f2f5;
-    --text-secondary: #8a919e;
-    --text-muted: #5c6370;
-
-    /* Status */
+    /* Status - Constant across themes */
     --status-critical: #EF5350;
     --status-warning: #FFA726;
     --status-good: #66BB6A;
     --status-info: #42A5F5;
+
+    /* LIGHT MODE (Default) */
+    --bg-base: #f8fafc;
+    --bg-surface: #ffffff;
+    --bg-elevated: #f1f5f9;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f8fafc;
+    --border: rgba(0, 0, 0, 0.08);
+    --border-light: rgba(0, 0, 0, 0.05);
+
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
 
     /* Sizing */
     --radius-sm: 8px;
@@ -36,6 +35,27 @@
     --radius-xl: 20px;
 
     /* Shadows */
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+    --shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
+    --shadow-glow: 0 0 20px rgba(102, 187, 106, 0.1);
+}
+
+/* DARK MODE OVERRIDES */
+[data-theme="dark"] {
+    --bg-base: #0c0f14;
+    --bg-surface: #13171e;
+    --bg-elevated: #1a1f28;
+    --bg-card: #1e2430;
+    --bg-card-hover: #252c3a;
+    --border: rgba(255, 255, 255, 0.06);
+    --border-light: rgba(255, 255, 255, 0.1);
+
+    --text-primary: #f0f2f5;
+    --text-secondary: #8a919e;
+    --text-muted: #5c6370;
+
+    --accent-glow: rgba(102, 187, 106, 0.25);
     --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
     --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
     --shadow-lg: 0 8px 30px rgba(0,0,0,0.5);
@@ -74,6 +94,13 @@ body {
 }
 
 /* ═══ UPLOAD SCREEN ═══ */
+.upload-top-actions {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    z-index: 10;
+}
+
 .upload-container {
     max-width: 560px;
     margin: 0 auto;

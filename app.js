@@ -578,6 +578,35 @@
         const uploadScreen = document.getElementById('upload-screen');
         const dashboard = document.getElementById('dashboard');
 
+        // Theme logic
+        const themeToggles = document.querySelectorAll('#theme-toggle, #theme-toggle-upload');
+
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('lawsons-theme', theme);
+            
+            const darkIcons = document.querySelectorAll('.theme-icon-dark, #theme-icon-dark');
+            const lightIcons = document.querySelectorAll('.theme-icon-light, #theme-icon-light');
+            
+            if (theme === 'dark') {
+                darkIcons.forEach(i => i.style.display = 'block');
+                lightIcons.forEach(i => i.style.display = 'none');
+            } else {
+                darkIcons.forEach(i => i.style.display = 'none');
+                lightIcons.forEach(i => i.style.display = 'block');
+            }
+        }
+
+        const savedTheme = localStorage.getItem('lawsons-theme') || 'light';
+        setTheme(savedTheme);
+
+        themeToggles.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                setTheme(currentTheme === 'dark' ? 'light' : 'dark');
+            });
+        });
+
         // Drop zone
         dropZone.addEventListener('click', () => csvInput.click());
         dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
