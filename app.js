@@ -480,13 +480,20 @@
     // ───────────────────────────────────────
     //  RENDER: TABLE
     // ───────────────────────────────────────
-    function renderTable(filter, search) {
+    function renderTable(catFilter, statusFilter, search) {
         const tbody = document.getElementById('posts-tbody');
         let filtered = [...posts];
 
-        if (filter && filter !== 'all') {
-            filtered = filtered.filter(p => [p.primaryCategory, ...p.secondaryCategories].includes(filter));
+        if (catFilter && catFilter !== 'all') {
+            filtered = filtered.filter(p => [p.primaryCategory, ...p.secondaryCategories].includes(catFilter));
         }
+        
+        if (statusFilter === 'live') {
+            filtered = filtered.filter(p => p.liveStatus === true);
+        } else if (statusFilter === '404') {
+            filtered = filtered.filter(p => p.liveStatus === false);
+        }
+
         if (search) {
             const q = search.toLowerCase();
             filtered = filtered.filter(p =>
@@ -797,7 +804,44 @@
             filteredCats = primaryCats.filter(c => c.toLowerCase().includes(q));
         }
 
-        listEl.innerHTML = filteredCats.map(primary => {
+        let missingCatHtml = '';
+        const missingPosts = posts.filter(p => p.primaryCategory === 'Uncategorised' && p.secondaryCategories.length === 0);
+        if (missingPosts.length > 0 && (!searchQuery || 'uncategorised'.includes(searchQuery.toLowerCase()))) {
+            missingCatHtml = `
+                <div class="manage-card" style="border: 2px solid var(--status-warning); background: rgba(255, 167, 38, 0.05);">
+                    <div class="manage-header">
+                        <div>
+                            <span class="manage-title" style="font-size:1.2rem; color: var(--status-warning);">⚠️ Missing Categories</span>
+                            <span class="manage-slug" style="display:block; margin-top:6px;">These posts have no category assigned. Select a primary category to map them into your taxonomy.</span>
+                        </div>
+                        <h2 style="color:var(--status-warning); opacity:0.3; margin:0; line-height:1;">${missingPosts.length}</h2>
+                    </div>
+                    <div class="manage-categories" style="display:block;">
+                        ${missingPosts.map(p => {
+                            const selectOptions = primaryCats.filter(c => c !== 'Uncategorised').map(c => 
+                                \`<option value="${esc(c)}">${esc(c)}</option>\`
+                            ).join('');
+                            return \`
+                            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-light); padding:12px 0;">
+                                <div style="flex:1; padding-right:16px;">
+                                    <strong>${esc(p.title)}</strong> <br>
+                                    <a href="${BLOG_PREFIX}${esc(p.slug)}" target="_blank" style="font-size:0.75rem; color:var(--accent); text-decoration:none;">/${esc(p.slug)}</a>
+                                </div>
+                                <div>
+                                    <select class="input-styled sel-missing-primary" data-post-idx="${p.idx}" style="max-width:200px;">
+                                        <option value="">Move to...</option>
+                                        ${selectOptions}
+                                    </select>
+                                </div>
+                            </div>
+                            \`;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        listEl.innerHTML = missingCatHtml + filteredCats.map(primary => {
             const currentSecondaries = Array.from(new Set(
                 posts.filter(p => p.primaryCategory === primary)
                      .flatMap(p => p.secondaryCategories)
@@ -855,6 +899,17 @@
                         }
                     });
                 }
+                renderAll();
+                renderCategoryManager(document.getElementById('manage-search').value);
+            });
+        });
+
+        listEl.querySelectorAll('.sel-missing-primary').forEach(sel => {
+            sel.addEventListener('change', e => {
+                if (!e.target.value) return;
+                const idx = parseInt(e.target.dataset.postIdx);
+                const post = posts.find(p => p.idx === idx);
+                post.primaryCategory = e.target.value;
                 renderAll();
                 renderCategoryManager(document.getElementById('manage-search').value);
             });
@@ -928,7 +983,7 @@
         renderCategoryGrid();
         renderGapAnalysis();
         renderInternalLinks('all');
-        renderTable('all', '');
+        renderTable('all', 'all', '');
         renderFreshness();
         populateFilters();
         
@@ -1083,19 +1138,17 @@
         });
 
         // Table filter & search
-        document.getElementById('table-category-filter').addEventListener('change', () => {
+        function updateTable() {
             renderTable(
                 document.getElementById('table-category-filter').value,
+                document.getElementById('table-status-filter').value,
                 document.getElementById('table-search').value
             );
-        });
+        }
 
-        document.getElementById('table-search').addEventListener('input', () => {
-            renderTable(
-                document.getElementById('table-category-filter').value,
-                document.getElementById('table-search').value
-            );
-        });
+        document.getElementById('table-category-filter').addEventListener('change', updateTable);
+        document.getElementById('table-status-filter').addEventListener('change', updateTable);
+        document.getElementById('table-search').addEventListener('input', updateTable);
 
         // Table sort
         document.querySelectorAll('#posts-table th[data-sort]').forEach(th => {
@@ -1107,10 +1160,7 @@
                     sortCol = col;
                     sortDir = 'asc';
                 }
-                renderTable(
-                    document.getElementById('table-category-filter').value,
-                    document.getElementById('table-search').value
-                );
+                updateTable();
             });
         });
 
