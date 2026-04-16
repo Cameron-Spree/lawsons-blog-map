@@ -189,12 +189,16 @@
     function processData() {
         categories = {};
         posts.forEach(p => {
-            const key = p.category;
-            if (!categories[key]) {
-                categories[key] = { posts: [], topics: new Set() };
-            }
-            categories[key].posts.push(p);
-            if (p.topic) categories[key].topics.add(p.topic);
+            // Split by comma or pipe, trim whitespace
+            const cats = p.category.split(/[,\x7C]/).map(c => c.trim()).filter(c => c);
+            
+            cats.forEach(cat => {
+                if (!categories[cat]) {
+                    categories[cat] = { posts: [], topics: new Set() };
+                }
+                categories[cat].posts.push(p);
+                if (p.topic) categories[cat].topics.add(p.topic);
+            });
         });
     }
 
