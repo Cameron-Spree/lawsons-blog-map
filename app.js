@@ -1004,180 +1004,118 @@
     //  EVENT HANDLERS
     // ───────────────────────────────────────
     function init() {
-        const dropZone = document.getElementById('drop-zone');
-        const csvInput = document.getElementById('csv-input');
-        const uploadScreen = document.getElementById('upload-screen');
-        const dashboard = document.getElementById('dashboard');
+        const el = id => document.getElementById(id);
+        const dropZone = el('drop-zone');
+        const csvInput = el('csv-input');
+        const uploadScreen = el('upload-screen');
+        const dashboard = el('dashboard');
 
         // Theme logic
         const themeToggles = document.querySelectorAll('#theme-toggle, #theme-toggle-upload');
-
-        function setTheme(theme) {
+        const setTheme = (theme) => {
             document.documentElement.setAttribute('data-theme', theme);
             localStorage.setItem('lawsons-theme', theme);
-            
             const darkIcons = document.querySelectorAll('.theme-icon-dark, #theme-icon-dark');
             const lightIcons = document.querySelectorAll('.theme-icon-light, #theme-icon-light');
-            
-            if (theme === 'dark') {
-                darkIcons.forEach(i => i.style.display = 'block');
-                lightIcons.forEach(i => i.style.display = 'none');
-            } else {
-                darkIcons.forEach(i => i.style.display = 'none');
-                lightIcons.forEach(i => i.style.display = 'block');
-            }
-        }
+            darkIcons.forEach(i => i.style.display = theme === 'dark' ? 'block' : 'none');
+            lightIcons.forEach(i => i.style.display = theme === 'dark' ? 'none' : 'block');
+        };
 
         const savedTheme = localStorage.getItem('lawsons-theme') || 'light';
         setTheme(savedTheme);
+        themeToggles.forEach(btn => btn.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            setTheme(currentTheme === 'dark' ? 'light' : 'dark');
+        }));
 
-        themeToggles.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const currentTheme = document.documentElement.getAttribute('data-theme');
-                setTheme(currentTheme === 'dark' ? 'light' : 'dark');
-            });
-        });
-
-        // Drop zone
-        dropZone.addEventListener('click', () => csvInput.click());
-        dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
-        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
-        dropZone.addEventListener('drop', e => {
-            e.preventDefault();
-            dropZone.classList.remove('drag-over');
-            const file = e.dataTransfer.files[0];
-            if (file) handleFile(file);
-        });
-
-        csvInput.addEventListener('change', () => {
-            if (csvInput.files[0]) handleFile(csvInput.files[0]);
-        });
-
-        function handleFile(file) {
-            if (!file.name.endsWith('.csv')) {
-                alert('Please upload a .csv file');
-                return;
-            }
+        const handleFile = (file) => {
+            if (!file.name.endsWith('.csv')) return alert('Please upload a .csv file');
             const reader = new FileReader();
             reader.onload = e => {
                 posts = parseCSV(e.target.result);
-                if (posts.length === 0) {
-                    alert('No valid rows found. Check your CSV format.');
-                    return;
-                }
+                if (posts.length === 0) return alert('No valid rows found. Check your CSV format.');
                 renderAll();
-                uploadScreen.classList.remove('active');
-                dashboard.classList.add('active');
+                if (uploadScreen) uploadScreen.classList.remove('active');
+                if (dashboard) dashboard.classList.add('active');
             };
             reader.readAsText(file);
+        };
+
+        // Drop zone
+        if (dropZone && csvInput) {
+            dropZone.addEventListener('click', () => csvInput.click());
+            dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+            dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+            dropZone.addEventListener('drop', e => {
+                e.preventDefault();
+                dropZone.classList.remove('drag-over');
+                if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+            });
+            csvInput.addEventListener('change', () => {
+                if (csvInput.files[0]) handleFile(csvInput.files[0]);
+            });
         }
 
-        // Re-upload
-        document.getElementById('btn-new-upload').addEventListener('click', () => {
-            dashboard.classList.remove('active');
-            uploadScreen.classList.add('active');
-            csvInput.value = '';
+        // Dashboard Listeners
+        const safeBind = (id, evt, fn) => {
+            const element = el(id);
+            if (element) element.addEventListener(evt, fn);
+        };
+
+        safeBind('btn-new-upload', 'click', () => {
+            if (dashboard) dashboard.classList.remove('active');
+            if (uploadScreen) uploadScreen.classList.add('active');
+            if (csvInput) csvInput.value = '';
         });
 
-        // Tabs
-        document.getElementById('tab-nav').addEventListener('click', e => {
+        safeBind('tab-nav', 'click', e => {
             const tab = e.target.closest('.tab');
             if (!tab) return;
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
             tab.classList.add('active');
-            document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+            const pnl = el('panel-' + tab.dataset.tab);
+            if (pnl) pnl.classList.add('active');
             
-            if (tab.dataset.tab === 'mindmap') {
-                setTimeout(renderMindmap, 50); // Redraw map to container bounds
-            }
-            if (tab.dataset.tab === 'manage') {
-                renderCategoryManager(document.getElementById('manage-search').value);
-            }
-            if (tab.dataset.tab === 'freshness') {
-                renderFreshness('all', 'all');
-            }
+            if (tab.dataset.tab === 'mindmap') setTimeout(renderMindmap, 50);
+            if (tab.dataset.tab === 'manage') renderCategoryManager(el('manage-search')?.value || '');
+            if (tab.dataset.tab === 'freshness') renderFreshness('all', 'all');
         });
 
-        // Global Event Listeners for new features
-        document.getElementById('btn-export-csv').addEventListener('click', exportCSV);
-        document.getElementById('btn-check-status').addEventListener('click', checkStatuses);
+        safeBind('btn-export-csv', 'click', exportCSV);
+        safeBind('btn-check-status', 'click', checkStatuses);
+        safeBind('manage-search', 'input', e => renderCategoryManager(e.target.value));
+        safeBind('link-category-filter', 'change', e => renderInternalLinks(e.target.value));
 
-        document.getElementById('btn-add-global-category').addEventListener('click', () => {
-            const newCat = prompt('Enter name for the new category:');
-            if (newCat && newCat.trim()) {
-                const catName = newCat.trim();
-                // Assign to first post safely to persist category structure initially
-                if (posts.length > 0) {
-                    if (!posts[0].secondaryCategories.includes(catName)) {
-                        posts[0].secondaryCategories.push(catName);
-                    }
-                }
-                renderAll();
-                renderCategoryManager(document.getElementById('manage-search').value);
-            }
-        });
+        const updateTableUI = () => {
+            const cf = el('table-category-filter');
+            const sf = el('table-status-filter');
+            const qf = el('table-search');
+            if (cf && sf && qf) renderTable(cf.value, sf.value, qf.value);
+        };
 
-        document.getElementById('manage-search').addEventListener('input', e => {
-            renderCategoryManager(e.target.value);
-        });
+        safeBind('table-category-filter', 'change', updateTableUI);
+        safeBind('table-status-filter', 'change', updateTableUI);
+        safeBind('table-search', 'input', updateTableUI);
 
-        // Modal close
-        document.getElementById('modal-close').addEventListener('click', () => {
-            document.getElementById('modal-overlay').hidden = true;
-        });
-        document.getElementById('modal-overlay').addEventListener('click', e => {
-            if (e.target === e.currentTarget) {
-                document.getElementById('modal-overlay').hidden = true;
-            }
-        });
-
-        // Link filter
-        document.getElementById('link-category-filter').addEventListener('change', e => {
-            renderInternalLinks(e.target.value);
-        });
-
-        // Table filter & search
-        function updateTable() {
-            renderTable(
-                document.getElementById('table-category-filter').value,
-                document.getElementById('table-status-filter').value,
-                document.getElementById('table-search').value
-            );
-        }
-
-        document.getElementById('table-category-filter').addEventListener('change', updateTable);
-        document.getElementById('table-status-filter').addEventListener('change', updateTable);
-        document.getElementById('table-search').addEventListener('input', updateTable);
-
-        // Table sort
         document.querySelectorAll('#posts-table th[data-sort]').forEach(th => {
             th.addEventListener('click', () => {
-                const col = th.dataset.sort;
-                if (sortCol === col) {
-                    sortDir = sortDir === 'asc' ? 'desc' : 'asc';
-                } else {
-                    sortCol = col;
-                    sortDir = 'asc';
-                }
-                updateTable();
+                sortDir = (sortCol === th.dataset.sort) ? (sortDir === 'asc' ? 'desc' : 'asc') : 'asc';
+                sortCol = th.dataset.sort;
+                updateTableUI();
             });
         });
 
-        // Freshness Filters
-        document.getElementById('freshness-status-filter').addEventListener('change', () => {
-            renderFreshness(
-                document.getElementById('freshness-status-filter').value,
-                document.getElementById('freshness-category-filter').value
-            );
-        });
-        
-        document.getElementById('freshness-category-filter').addEventListener('change', () => {
-            renderFreshness(
-                document.getElementById('freshness-status-filter').value,
-                document.getElementById('freshness-category-filter').value
-            );
-        });
+        const updateFreshUI = () => {
+            const s = el('freshness-status-filter');
+            const c = el('freshness-category-filter');
+            if (s && c) renderFreshness(s.value, c.value);
+        };
+
+        safeBind('freshness-status-filter', 'change', updateFreshUI);
+        safeBind('freshness-category-filter', 'change', updateFreshUI);
+
+        console.log('Lawsons Blog Map: Initialized');
     }
 
     // ── Utility ──
