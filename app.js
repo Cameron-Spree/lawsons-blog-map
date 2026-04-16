@@ -110,6 +110,7 @@
         const slugIdx = header.indexOf('slug');
         const titleIdx = header.indexOf('title');
         const catIdx = header.indexOf('category');
+        const dateIdx = header.indexOf('publisheddate');
 
         if (titleIdx === -1 || catIdx === -1) {
             alert('CSV must contain at least "title" and "category" columns.');
@@ -127,6 +128,15 @@
             const cats = categoryStr.split(/[,\x7C]/).map(c => c.trim()).filter(c => c);
             const primaryCategory = cats.length > 0 ? cats[0] : 'Uncategorised';
             const secondaryCategories = cats.length > 1 ? cats.slice(1) : [];
+            
+            const dateRaw = dateIdx !== -1 ? (cols[dateIdx] || '').trim() : '';
+            let parsedDate = null;
+            if (dateRaw) {
+               const match = dateRaw.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
+               if (match) {
+                   parsedDate = new Date(match[3], parseInt(match[2])-1, match[1]).getTime();
+               }
+            }
 
             result.push({
                 idx: i,
@@ -134,7 +144,9 @@
                 title: title,
                 primaryCategory: primaryCategory,
                 secondaryCategories: secondaryCategories,
-                liveStatus: null
+                liveStatus: null,
+                publishDateStr: dateRaw,
+                publishTimestamp: parsedDate
             });
         }
         return result;
@@ -501,6 +513,7 @@
                 <td>${esc(p.title)} ${badge}</td>
                 <td>${esc(p.primaryCategory)}</td>
                 <td>${esc(p.secondaryCategories.join(', ') || '—')}</td>
+                <td>${esc(p.publishDateStr || '—')}</td>
                 <td><a href="${BLOG_PREFIX}${esc(p.slug)}" target="_blank" class="slug-link">${esc(p.slug)}</a></td>
             </tr>
             `;
@@ -543,6 +556,41 @@
 
         content.innerHTML = html;
         overlay.hidden = false;
+    }
+
+    // ───────────────────────────────────────
+    //  RENDER: FRESHNESS
+    // ───────────────────────────────────────
+    function renderFreshness() {
+        const listEl = document.getElementById('freshness-list');
+        if (!listEl) return;
+        
+        const datedPosts = posts.filter(p => p.publishTimestamp).sort((a, b) => a.publishTimestamp - b.publishTimestamp);
+        const now = new Date().getTime();
+        const oneYear = 1000 * 60 * 60 * 24 * 365.25;
+
+        listEl.innerHTML = datedPosts.map(p => {
+            const ageMs = now - p.publishTimestamp;
+            const yearsOld = (ageMs / oneYear).toFixed(1);
+            const isStale = ageMs > oneYear;
+            const badgeClass = isStale ? 'status-critical' : 'status-good';
+
+            return `
+                <div class="manage-card" style="display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <span class="manage-title">${esc(p.title)}</span>
+                        ${p.liveStatus === true ? '<span class="post-status status-live">Live</span>' : 
+                          p.liveStatus === false ? '<span class="post-status status-404">404</span>' : ''}
+                        <span class="manage-slug" style="display:block; margin-top:6px;">Published: <strong>${esc(p.publishDateStr)}</strong> (${yearsOld} years ago)</span>
+                    </div>
+                    <div>
+                        <span class="post-status" style="color:var(--${badgeClass}); border: 1px solid var(--border-light); background: var(--bg-card); padding:4px 8px; font-size:0.7rem;">${isStale ? '⚠️ Needs Update' : '✅ Fresh'}</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        if (datedPosts.length === 0) listEl.innerHTML = '<p style="padding:40px; text-align:center; color:var(--text-muted);">No published dates found in CSV.</p>';
     }
 
     // ───────────────────────────────────────
@@ -773,6 +821,7 @@
         renderGapAnalysis();
         renderInternalLinks('all');
         renderTable('all', '');
+        renderFreshness();
         populateFilters();
         
         // Let Mindmap redraw if tab is active
@@ -881,6 +930,9 @@
             }
             if (tab.dataset.tab === 'manage') {
                 renderCategoryManager(document.getElementById('manage-search').value);
+            }
+            if (tab.dataset.tab === 'freshness') {
+                renderFreshness();
             }
         });
 
