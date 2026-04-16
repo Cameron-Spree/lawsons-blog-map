@@ -954,6 +954,40 @@
         document.body.removeChild(link);
     }
 
+    function exportMatrixCSV() {
+        const storeKeys = Object.keys(STORE_VIEWS);
+        const storeNames = {
+            'lawsons': 'Lawsons', 'avs': 'AVS Fencing', 'oxford': 'Oxford Fencing', 
+            'witham': 'Witham Timber', 'landscape': 'Landscape Centre', 'southill': 'Southill Sawmills'
+        };
+
+        const header = ['slug', 'title', 'category', ...storeKeys.map(k => storeNames[k] || k)];
+        
+        const rows = posts.map(p => {
+            const cache = matrixCache[p.slug] || {};
+            const statuses = storeKeys.map(k => {
+                const s = cache[k];
+                return s === true ? 'Live' : (s === false ? '404' : 'Pending');
+            });
+
+            return [
+                `"${p.slug.replace(/"/g, '""')}"`,
+                `"${p.title.replace(/"/g, '""')}"`,
+                `"${p.primaryCategory.replace(/"/g, '""')}"`,
+                ...statuses.map(s => `"${s}"`)
+            ].join(',');
+        });
+        
+        const csvContent = "data:text/csv;charset=utf-8," + [header.join(','), ...rows].join('\n');
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "published-status-matrix.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
     // ───────────────────────────────────────
     //  API INTEGRATION: STATUS CHECKER
     // ───────────────────────────────────────
@@ -1261,6 +1295,7 @@
         });
 
         safeBind('btn-export-csv', 'click', exportCSV);
+        safeBind('btn-export-matrix', 'click', exportMatrixCSV);
         safeBind('btn-check-status', 'click', checkStatuses);
         safeBind('store-selector', 'change', () => {
             // Re-render UI to update links when store view changes
