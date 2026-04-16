@@ -10,6 +10,7 @@
     let categories = {};   // { name: { posts: [], topics: Set } }
     let sortCol = null;
     let sortDir = 'asc';
+    let matrixCache = {}; // { slug: { lawsons: true, avs: false, ... } }
 
     const STORE_VIEWS = {
         'lawsons': 'https://www.lawsons.co.uk/blog/',
@@ -998,6 +999,10 @@
         renderInternalLinks('all');
         renderTable('all', 'all', '');
         renderFreshness();
+        renderMatrix(
+            document.getElementById('matrix-filter') ? document.getElementById('matrix-filter').value : 'all',
+            document.getElementById('matrix-search') ? document.getElementById('matrix-search').value : ''
+        );
         populateFilters();
         
         // Let Mindmap redraw if tab is active
@@ -1011,6 +1016,137 @@
         if (manageTab && manageTab.classList.contains('active')) {
             renderCategoryManager(document.getElementById('manage-search').value);
         }
+    }
+
+    // ───────────────────────────────────────
+    //  MATRIX ENGINE
+    // ───────────────────────────────────────
+    
+    function renderMatrix(filter, searchQuery) {
+        const tbody = document.getElementById('matrix-tbody');
+        const thead = document.getElementById('matrix-thead-row');
+        if (!tbody || !thead) return;
+
+        // Build headings
+        let thHtml = `<th>Post Details</th>`;
+        const storeKeys = Object.keys(STORE_VIEWS);
+        const storeNames = {
+            'lawsons': 'Lawsons', 'avs': 'AVS Fencing', 'oxford': 'Oxford Fencing', 
+            'witham': 'Witham Timber', 'landscape': 'Landscape Centre', 'southill': 'Southill Sawmills'
+        };
+        storeKeys.forEach(k => {
+            thHtml += `<th>${storeNames[k] || k}</th>`;
+        });
+        thead.innerHTML = thHtml;
+
+        // Filter posts
+        let filtered = posts;
+        if (searchQuery) {
+            const q = searchQuery.toLowerCase();
+            filtered = filtered.filter(p => p.title.toLowerCase().includes(q) || p.slug.toLowerCase().includes(q));
+        }
+
+        if (filter === 'missing-any') {
+            filtered = filtered.filter(p => {
+                const cache = matrixCache[p.slug] || {};
+                return storeKeys.some(k => cache[k] === false);
+            });
+        } else if (filter === 'missing-all') {
+            filtered = filtered.filter(p => {
+                const cache = matrixCache[p.slug] || {};
+                // If every checked store is false (but we must have checked at least one to be sure, or we assume null means haven't checked so don't hide)
+                return storeKeys.every(k => cache[k] === false);
+            });
+        } else if (filter === 'live-all') {
+            filtered = filtered.filter(p => {
+                const cache = matrixCache[p.slug] || {};
+                return storeKeys.every(k => cache[k] === true);
+            });
+        }
+
+        let html = '';
+        filtered.forEach(p => {
+            const cache = matrixCache[p.slug] || {};
+            let rowHtml = `<tr>`;
+            rowHtml += `
+            <td>
+                <strong>${esc(p.title)}</strong><br>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">${esc(p.primaryCategory)} — <a href="${STORE_VIEWS['lawsons']}${esc(p.slug)}" target="_blank" style="color:var(--accent); text-decoration:none;">/${esc(p.slug)}</a></span>
+            </td>`;
+            
+            storeKeys.forEach(k => {
+                const status = cache[k];
+                if (status === true) {
+                    rowHtml += `<td class="matrix-status-cell matrix-live">✓</td>`;
+                } else if (status === false) {
+                    rowHtml += `<td class="matrix-status-cell matrix-404">✗</td>`;
+                } else {
+                    rowHtml += `<td class="matrix-status-cell matrix-pending">-</td>`;
+                }
+            });
+            rowHtml += `</tr>`;
+            html += rowHtml;
+        });
+
+        tbody.innerHTML = html;
+    }
+
+    async function runMatrixCheck() {
+        const btn = document.getElementById('btn-run-matrix');
+        const progressBar = document.getElementById('matrix-progress-bar');
+        const progressContainer = document.getElementById('matrix-progress-container');
+        const progressText = document.getElementById('matrix-progress-text');
+        
+        if (!btn || !posts.length) return;
+        
+        btn.disabled = true;
+        progressContainer.style.display = 'block';
+
+        const storeKeys = Object.keys(STORE_VIEWS);
+        let completed = 0;
+        const total = posts.length * storeKeys.length;
+        
+        const updateProgress = () => {
+            const pct = Math.round((completed / total) * 100);
+            progressBar.style.width = pct + '%';
+            progressText.innerText = `${completed} / ${total}`;
+        };
+
+        // Batch by post to prevent blowing up the browser
+        const batchSize = 5; 
+        for (let i = 0; i < posts.length; i += batchSize) {
+            const batch = posts.slice(i, i + batchSize);
+            
+            await Promise.all(batch.map(async p => {
+                if (!matrixCache[p.slug]) matrixCache[p.slug] = {};
+                
+                await Promise.all(storeKeys.map(async k => {
+                    try {
+                        const url = `${STORE_VIEWS[k]}${p.slug}`;
+                        const res = await fetch(`/api/check?url=${encodeURIComponent(url)}`);
+                        if (res.ok) {
+                            const data = await res.json();
+                            matrixCache[p.slug][k] = (data.status === 200);
+                        } else {
+                            matrixCache[p.slug][k] = false;
+                        }
+                    } catch(e) {
+                        matrixCache[p.slug][k] = false;
+                    }
+                    completed++;
+                }));
+            }));
+            
+            // Re-render UI progressively every batch
+            updateProgress();
+            renderMatrix(
+                document.getElementById('matrix-filter') ? document.getElementById('matrix-filter').value : 'all',
+                document.getElementById('matrix-search') ? document.getElementById('matrix-search').value : ''
+            );
+        }
+
+        btn.disabled = false;
+        setTimeout(() => { progressContainer.style.display = 'none'; }, 2000);
     }
 
     // ───────────────────────────────────────
@@ -1092,6 +1228,9 @@
             if (tab.dataset.tab === 'mindmap') setTimeout(renderMindmap, 50);
             if (tab.dataset.tab === 'manage') renderCategoryManager(el('manage-search')?.value || '');
             if (tab.dataset.tab === 'freshness') renderFreshness('all', 'all');
+            if (tab.dataset.tab === 'published') {
+                renderMatrix(el('matrix-filter')?.value || 'all', el('matrix-search')?.value || '');
+            }
         });
 
         safeBind('btn-export-csv', 'click', exportCSV);
@@ -1100,6 +1239,16 @@
             // Re-render UI to update links when store view changes
             if (posts.length > 0) renderAll();
         });
+        
+        safeBind('btn-run-matrix', 'click', runMatrixCheck);
+        
+        const updateMatrixUI = () => {
+            const f = el('matrix-filter');
+            const s = el('matrix-search');
+            if (f && s) renderMatrix(f.value, s.value);
+        };
+        safeBind('matrix-filter', 'change', updateMatrixUI);
+        safeBind('matrix-search', 'input', updateMatrixUI);
         safeBind('manage-search', 'input', e => renderCategoryManager(e.target.value));
         safeBind('link-category-filter', 'change', e => renderInternalLinks(e.target.value));
 
