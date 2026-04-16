@@ -25,7 +25,7 @@
             <h1>Blog Content Map</h1>
             <p class="subtitle">Upload your blog CSV to visualise content coverage, spot gaps, and discover internal linking opportunities.</p>
 
-            <div id="drop-zone" class="drop-zone">
+            <label id="drop-zone" class="drop-zone" for="csv-input">
                 <div class="drop-zone-icon">
                     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -35,8 +35,8 @@
                 </div>
                 <p class="drop-zone-text">Drag &amp; drop your CSV here</p>
                 <p class="drop-zone-hint">or click to browse</p>
-                <input type="file" id="csv-input" accept=".csv" style="display: none;">
-            </div>
+            </label>
+            <input type="file" id="csv-input" accept=".csv" style="display: none;">
 
             <div class="csv-format-hint">
                 <p><strong>Expected columns:</strong> <code>slug</code>, <code>title</code>, <code>category</code></p>
@@ -237,6 +237,6 @@
     </div>
 
     <script src="app.js"></script>
-    <div class="version-tag">v.1.04</div>
+    <div class="version-tag">v.1.05</div>
 </body>
 </html>

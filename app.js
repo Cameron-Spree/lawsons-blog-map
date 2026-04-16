@@ -1043,7 +1043,6 @@
 
         // Drop zone
         if (dropZone && csvInput) {
-            dropZone.addEventListener('click', () => csvInput.click());
             dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
             dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
             dropZone.addEventListener('drop', e => {

@@ -155,6 +155,7 @@ body {
 
 /* Drop zone */
 .drop-zone {
+    display: block;
     border: 2px dashed var(--border-light);
     border-radius: var(--radius-lg);
     padding: 48px 32px;
