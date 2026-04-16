@@ -11,6 +11,8 @@
     let sortCol = null;
     let sortDir = 'asc';
 
+    const BLOG_PREFIX = 'https://www.lawsons.co.uk/blog/';
+
     // ── Colour palette for category cards ──
     const PALETTE = [
         '#66BB6A', '#42A5F5', '#AB47BC', '#FFA726',
@@ -409,9 +411,9 @@
                     </div>
                     ${displayPairs.map(p => `
                         <div class="link-item">
-                            <div class="link-from"><strong>${esc(p.from.title)}</strong><br><span style="font-size:0.75rem;color:var(--text-muted);">/${esc(p.from.slug)}</span></div>
+                            <div class="link-from"><strong>${esc(p.from.title)}</strong><br><a href="${BLOG_PREFIX}${esc(p.from.slug)}" target="_blank" class="slug-link">${esc(p.from.slug)}</a></div>
                             <div class="link-arrow">⟷</div>
-                            <div class="link-to"><strong>${esc(p.to.title)}</strong><br><span style="font-size:0.75rem;color:var(--text-muted);">/${esc(p.to.slug)}</span></div>
+                            <div class="link-to"><strong>${esc(p.to.title)}</strong><br><a href="${BLOG_PREFIX}${esc(p.to.slug)}" target="_blank" class="slug-link">${esc(p.to.slug)}</a></div>
                         </div>
                     `).join('')}
                 </div>
@@ -435,9 +437,9 @@
                         </div>
                         ${crossLinks.map(p => `
                             <div class="link-item">
-                                <div class="link-from"><strong>${esc(p.from.title)}</strong><br><span style="font-size:0.75rem;color:var(--text-muted);">${esc(p.from.category)}</span></div>
+                                <div class="link-from"><strong>${esc(p.from.title)}</strong><br><a href="${BLOG_PREFIX}${esc(p.from.slug)}" target="_blank" class="slug-link">${esc(p.from.category)}</a></div>
                                 <div class="link-arrow">→</div>
-                                <div class="link-to"><strong>${esc(p.to.title)}</strong><br><span style="font-size:0.75rem;color:var(--text-muted);">${esc(p.to.category)}</span></div>
+                                <div class="link-to"><strong>${esc(p.to.title)}</strong><br><a href="${BLOG_PREFIX}${esc(p.to.slug)}" target="_blank" class="slug-link">${esc(p.to.category)}</a></div>
                             </div>
                         `).join('')}
                     </div>
@@ -506,7 +508,7 @@
                 <td>${esc(p.title)}</td>
                 <td>${esc(p.category)}</td>
                 <td>${esc(p.topic || '—')}</td>
-                <td style="font-family:monospace;font-size:0.8rem;color:var(--text-muted);">/${esc(p.slug)}</td>
+                <td><a href="${BLOG_PREFIX}${esc(p.slug)}" target="_blank" class="slug-link">${esc(p.slug)}</a></td>
             </tr>
         `).join('');
     }
@@ -533,7 +535,7 @@
             html += `<h4 style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin:20px 0 8px;">${esc(topic)}</h4>`;
             html += `<ul class="modal-post-list">`;
             topicPosts.forEach(p => {
-                html += `<li><span class="modal-post-title">${esc(p.title)}</span><span class="modal-post-slug">/${esc(p.slug)}</span></li>`;
+                html += `<li><span class="modal-post-title">${esc(p.title)}</span><a href="${BLOG_PREFIX}${esc(p.slug)}" target="_blank" class="slug-link">${esc(p.slug)}</a></li>`;
             });
             html += `</ul>`;
         }
