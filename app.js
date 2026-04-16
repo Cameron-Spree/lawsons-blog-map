@@ -11,7 +11,20 @@
     let sortCol = null;
     let sortDir = 'asc';
 
-    const BLOG_PREFIX = 'https://www.lawsons.co.uk/blog/';
+    const STORE_VIEWS = {
+        'lawsons': 'https://www.lawsons.co.uk/blog/',
+        'avs': 'https://www.avsfencing.co.uk/blog/',
+        'oxford': 'https://www.oxfordfencing.co.uk/blog/',
+        'witham': 'https://www.withamtimber.co.uk/blog/',
+        'landscape': 'https://the-landscape-centre.co.uk/blog/',
+        'southill': 'https://www.southillsawmills.co.uk/blog/'
+    };
+
+    function getBlogPrefix() {
+        const selector = document.getElementById('store-selector');
+        const key = selector ? selector.value : 'lawsons';
+        return STORE_VIEWS[key] || STORE_VIEWS['lawsons'];
+    }
 
     // ── Colour palette for category cards ──
     const PALETTE = [
@@ -413,9 +426,9 @@
                     </div>
                     ${displayPairs.map(p => `
                         <div class="link-item">
-                            <div class="link-from"><strong>${esc(p.from.title)}</strong><br><a href="${BLOG_PREFIX}${esc(p.from.slug)}" target="_blank" class="slug-link">${esc(p.from.slug)}</a></div>
+                            <div class="link-from"><strong>${esc(p.from.title)}</strong><br><a href="${getBlogPrefix()}${esc(p.from.slug)}" target="_blank" class="slug-link">${esc(p.from.slug)}</a></div>
                             <div class="link-arrow">⟷</div>
-                            <div class="link-to"><strong>${esc(p.to.title)}</strong><br><a href="${BLOG_PREFIX}${esc(p.to.slug)}" target="_blank" class="slug-link">${esc(p.to.slug)}</a></div>
+                            <div class="link-to"><strong>${esc(p.to.title)}</strong><br><a href="${getBlogPrefix()}${esc(p.to.slug)}" target="_blank" class="slug-link">${esc(p.to.slug)}</a></div>
                         </div>
                     `).join('')}
                 </div>
@@ -439,9 +452,9 @@
                         </div>
                         ${crossLinks.map(p => `
                             <div class="link-item">
-                                <div class="link-from"><strong>${esc(p.from.title)}</strong><br><a href="${BLOG_PREFIX}${esc(p.from.slug)}" target="_blank" class="slug-link">${esc(p.from.primaryCategory)}</a></div>
+                                <div class="link-from"><strong>${esc(p.from.title)}</strong><br><a href="${getBlogPrefix()}${esc(p.from.slug)}" target="_blank" class="slug-link">${esc(p.from.primaryCategory)}</a></div>
                                 <div class="link-arrow">→</div>
-                                <div class="link-to"><strong>${esc(p.to.title)}</strong><br><a href="${BLOG_PREFIX}${esc(p.to.slug)}" target="_blank" class="slug-link">${esc(p.to.primaryCategory)}</a></div>
+                                <div class="link-to"><strong>${esc(p.to.title)}</strong><br><a href="${getBlogPrefix()}${esc(p.to.slug)}" target="_blank" class="slug-link">${esc(p.to.primaryCategory)}</a></div>
                             </div>
                         `).join('')}
                     </div>
@@ -521,7 +534,7 @@
                 <td>${esc(p.primaryCategory)}</td>
                 <td>${esc(p.secondaryCategories.join(', ') || '—')}</td>
                 <td>${esc(p.publishDateStr || '—')}</td>
-                <td><a href="${BLOG_PREFIX}${esc(p.slug)}" target="_blank" class="slug-link">${esc(p.slug)}</a></td>
+                <td><a href="${getBlogPrefix()}${esc(p.slug)}" target="_blank" class="slug-link">${esc(p.slug)}</a></td>
             </tr>
             `;
         }).join('');
@@ -546,7 +559,7 @@
             primaryPosts.forEach(p => {
                 const badge = p.liveStatus === true ? '<span class="post-status status-live">Live</span>' : 
                               p.liveStatus === false ? '<span class="post-status status-404">404</span>' : '';
-                html += `<li><span class="modal-post-title">${esc(p.title)} ${badge}</span><a href="${BLOG_PREFIX}${esc(p.slug)}" target="_blank" class="slug-link">${esc(p.slug)}</a></li>`;
+                html += `<li><span class="modal-post-title">${esc(p.title)} ${badge}</span><a href="${getBlogPrefix()}${esc(p.slug)}" target="_blank" class="slug-link">${esc(p.slug)}</a></li>`;
             });
             html += `</ul>`;
         }
@@ -556,7 +569,7 @@
             secondaryPosts.forEach(p => {
                 const badge = p.liveStatus === true ? '<span class="post-status status-live">Live</span>' : 
                               p.liveStatus === false ? '<span class="post-status status-404">404</span>' : '';
-                html += `<li><span class="modal-post-title">${esc(p.title)} ${badge} <span style="font-size:0.7rem; color:var(--text-muted)">(Primary: ${esc(p.primaryCategory)})</span></span><a href="${BLOG_PREFIX}${esc(p.slug)}" target="_blank" class="slug-link">${esc(p.slug)}</a></li>`;
+                html += `<li><span class="modal-post-title">${esc(p.title)} ${badge} <span style="font-size:0.7rem; color:var(--text-muted)">(Primary: ${esc(p.primaryCategory)})</span></span><a href="${getBlogPrefix()}${esc(p.slug)}" target="_blank" class="slug-link">${esc(p.slug)}</a></li>`;
             });
             html += `</ul>`;
         }
@@ -825,7 +838,7 @@
                             <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-light); padding:12px 0;">
                                 <div style="flex:1; padding-right:16px;">
                                     <strong>${esc(p.title)}</strong> <br>
-                                    <a href="${BLOG_PREFIX}${esc(p.slug)}" target="_blank" style="font-size:0.75rem; color:var(--accent); text-decoration:none;">/${esc(p.slug)}</a>
+                                    <a href="${getBlogPrefix()}${esc(p.slug)}" target="_blank" style="font-size:0.75rem; color:var(--accent); text-decoration:none;">/${esc(p.slug)}</a>
                                 </div>
                                 <div>
                                     <select class="input-styled sel-missing-primary" data-post-idx="${p.idx}" style="max-width:200px;">
@@ -953,7 +966,7 @@
             const batch = posts.slice(i, i + batchSize);
             await Promise.all(batch.map(async p => {
                 try {
-                    const url = `${BLOG_PREFIX}${p.slug}`;
+                    const url = `${getBlogPrefix()}${p.slug}`;
                     const res = await fetch(`/api/check?url=${encodeURIComponent(url)}`);
                     if (res.ok) {
                         const data = await res.json();
@@ -1083,6 +1096,10 @@
 
         safeBind('btn-export-csv', 'click', exportCSV);
         safeBind('btn-check-status', 'click', checkStatuses);
+        safeBind('store-selector', 'change', () => {
+            // Re-render UI to update links when store view changes
+            if (posts.length > 0) renderAll();
+        });
         safeBind('manage-search', 'input', e => renderCategoryManager(e.target.value));
         safeBind('link-category-filter', 'change', e => renderInternalLinks(e.target.value));
 
@@ -1127,3 +1144,4 @@
     // ── Bootstrap ──
     document.addEventListener('DOMContentLoaded', init);
 })();
+
