@@ -733,6 +733,10 @@ body {
     animation: fadeIn 0.2s ease;
 }
 
+.modal-overlay[hidden] {
+    display: none !important;
+}
+
 .modal {
     background: var(--bg-surface);
     border-radius: var(--radius-lg);
