@@ -21,99 +21,80 @@
         '#5C6BC0', '#9CCC65', '#29B6F6', '#D4E157'
     ];
 
-    // ── Known topic suggestions per common Lawsons category ──
-    const TOPIC_SUGGESTIONS = {
+    // ── Extensive industry knowledge base for Gap Analysis ──
+    const KNOWLEDGE_BASE = {
         'decking': [
-            'Composite vs Timber decking comparison',
-            'How to build a decking subframe',
-            'Best decking oils & stains for 2025',
-            'Decking maintenance checklist (seasonal)',
-            'How to clean and restore old decking',
-            'Non-slip decking options for safety',
-            'Choosing the right decking boards for your garden'
+            'Composite vs Timber decking comparison', 'How to build a decking subframe', 'Best decking oils & stains for 2025',
+            'Decking maintenance checklist (seasonal)', 'How to clean and restore old decking', 'Non-slip decking options for safety',
+            'Choosing the right decking boards for your garden', 'Deck decking ideas for small gardens', 'How long does timber decking last'
         ],
         'fencing': [
-            'Closeboard vs lap panel fencing',
-            'How to install fence posts in concrete',
-            'Best fence panels for windy areas',
-            'Garden privacy solutions with fencing',
-            'Decorative fencing ideas for front gardens',
-            'How long does timber fencing last?',
-            'Fence maintenance tips by season'
+            'Closeboard vs lap panel fencing', 'How to install fence posts in concrete', 'Best fence panels for windy areas',
+            'Garden privacy solutions with fencing', 'Decorative fencing ideas for front gardens', 'How long does timber fencing last?',
+            'Fence maintenance tips by season', 'Trellis fencing ideas', 'Repairing a broken fence post'
         ],
         'landscaping': [
-            'How to lay railway sleepers in the garden',
-            'Choosing decorative aggregates',
-            'Garden edging ideas with timber',
-            'Raised bed construction guide',
-            'Retaining wall guide with sleepers',
-            'Using bark mulch vs gravel – pros and cons'
+            'How to lay railway sleepers in the garden', 'Choosing decorative aggregates', 'Garden edging ideas with timber',
+            'Raised bed construction guide', 'Retaining wall guide with sleepers', 'Using bark mulch vs gravel – pros and cons',
+            'Topsoil guide: what you need to know', 'Laying a patio base'
         ],
         'building': [
-            'A guide to building regulations for homeowners',
-            'Types of bricks and when to use them',
-            'Insulation buying guide',
-            'Lintels explained – types and sizing',
-            'Understanding DPC and DPM',
-            'How to read a building plan for beginners'
+            'A guide to building regulations for homeowners', 'Types of bricks and when to use them', 'Insulation buying guide',
+            'Lintels explained – types and sizing', 'Understanding DPC and DPM', 'How to read a building plan for beginners',
+            'Cement mixing ratios for beginners', 'Breeze blocks vs concrete blocks'
         ],
         'roofing': [
-            'Felt vs membrane flat roofing',
-            'Common roof tile types in the UK',
-            'How to repair a leaking roof',
-            'Roof insulation options and U-values',
-            'Lead flashing alternatives'
+            'Felt vs membrane flat roofing', 'Common roof tile types in the UK', 'How to repair a leaking roof',
+            'Roof insulation options and U-values', 'Lead flashing alternatives', 'EPDM rubber roofing benefits',
+            'How to felt a shed roof properly'
         ],
         'timber': [
-            'Treated vs untreated timber – which to choose',
-            'Timber grading explained (C16, C24)',
-            'Sheet materials comparison: plywood, OSB, MDF',
-            'How to store timber properly on site',
-            'Sustainable timber sourcing and FSC certification'
+            'Treated vs untreated timber – which to choose', 'Timber grading explained (C16, C24)', 'How to store timber properly on site',
+            'Sustainable timber sourcing and FSC certification', 'Warped timber: prevention and solutions',
+            'Rough sawn vs planed timber'
+        ],
+        'sheet materials': [
+            'Plywood grades explained', 'When to use OSB vs Plywood', 'MDF finishing techniques', 'Marine ply uses',
+            'Chipboard flooring installation guide'
         ],
         'plumbing': [
-            'Push-fit vs soldered plumbing fittings',
-            'How to install a radiator',
-            'Pipe sizing guide for domestic properties',
-            'Underfloor heating system types'
+            'Push-fit vs soldered plumbing fittings', 'How to install a radiator', 'Pipe sizing guide for domestic properties',
+            'Underfloor heating system types', 'Clearing blocked external drains'
+        ],
+        'electrical': [
+            'Wiring basics for outbuildings', 'Types of electrical cable explained', 'Outdoor lighting planning',
+            'Safe bathroom electrical zones', 'Choosing external sockets'
         ],
         'tools': [
-            'Essential tools for every tradesperson',
-            'Power tool safety guide',
-            'How to choose the right drill bits',
-            'Hand tool vs power tool: when to use each'
+            'Essential tools for every tradesperson', 'Power tool safety guide', 'How to choose the right drill bits',
+            'Hand tool vs power tool: when to use each', 'Maintaining your saw blades'
+        ],
+        'decorating': [
+            'Best exterior paints for masonry', 'Preparing timber for painting', 'Wallpapering tips', 
+            'Choosing brushes vs rollers', 'Woodcare finishes: Varnish vs Stain vs Oil'
         ],
         'insulation': [
-            'Types of insulation and R-values',
-            'Cavity wall vs solid wall insulation',
-            'Loft insulation installation guide',
-            'Thermal bridging – what it is and how to avoid it'
+            'Types of insulation and R-values', 'Cavity wall vs solid wall insulation', 'Loft insulation installation guide',
+            'Thermal bridging – what it is and how to avoid it', 'PIR vs Mineral wool insulation'
         ],
         'drainage': [
-            'Surface water drainage options for driveways',
-            'How to install a soakaway',
-            'Channel drain installation guide',
+            'Surface water drainage options for driveways', 'How to install a soakaway', 'Channel drain installation guide',
             'Land drainage for gardens'
         ],
-        'home improvement': [
-            'Bathroom renovation planning guide',
-            'Kitchen extension checklist',
-            'How to plan a loft conversion',
-            'Energy efficiency improvements for older homes',
-            'DIY vs hiring a tradesperson'
+        'garden buildings': [
+            'How to build a shed base', 'Insulating a summerhouse', 'Maintaining timber sheds', 'Log cabin planning permission'
         ],
-        'seasonal': [
-            'Preparing your garden for winter',
-            'Spring maintenance checklist for your home',
-            'Summer outdoor living setup guide',
-            'Autumn gutter cleaning and prep'
+        'ironmongery': [
+            'Types of door hinges', 'Security locks guide', 'Choosing door handles', 'Gate furniture guide'
         ],
-        'diy': [
-            'Beginner\'s guide to plastering',
-            'How to tile a bathroom wall',
-            'Fitting skirting boards step by step',
-            'How to hang a door',
-            'Painting preparation tips for a professional finish'
+        'doors & windows': [
+            'Hanging an internal door', 'uPVC vs timber windows', 'Skylight installation', 'Fixing drafty windows'
+        ],
+        'flooring': [
+            'Laying laminate flooring', 'Engineered wood vs solid wood', 'Underfloor heating for wood floors'
+        ],
+        'hardware': [
+            'Screws guide: which to use', 'Wall plugs explained', 'Nails types and uses'
         ]
     };
 
@@ -124,12 +105,11 @@
         const lines = text.split(/\r?\n/).filter(l => l.trim());
         if (lines.length < 2) return [];
 
-        // Parse header
+        // Parse header (ignore topic column)
         const header = parseCSVLine(lines[0]).map(h => h.trim().toLowerCase().replace(/[^a-z0-9_]/g, ''));
         const slugIdx = header.indexOf('slug');
         const titleIdx = header.indexOf('title');
         const catIdx = header.indexOf('category');
-        const topicIdx = header.indexOf('topic');
 
         if (titleIdx === -1 || catIdx === -1) {
             alert('CSV must contain at least "title" and "category" columns.');
@@ -140,14 +120,20 @@
         for (let i = 1; i < lines.length; i++) {
             const cols = parseCSVLine(lines[i]);
             const title = (cols[titleIdx] || '').trim();
-            const category = (cols[catIdx] || '').trim();
-            if (!title || !category) continue;
+            const categoryStr = (cols[catIdx] || '').trim();
+            if (!title || !categoryStr) continue;
+
+            // Split by comma or pipe, trim whitespace
+            const cats = categoryStr.split(/[,\x7C]/).map(c => c.trim()).filter(c => c);
+            const primaryCategory = cats.length > 0 ? cats[0] : 'Uncategorised';
+            const secondaryCategories = cats.length > 1 ? cats.slice(1) : [];
 
             result.push({
+                idx: i,
                 slug: slugIdx !== -1 ? (cols[slugIdx] || '').trim() : slugify(title),
                 title: title,
-                category: category,
-                topic: topicIdx !== -1 ? (cols[topicIdx] || '').trim() : ''
+                primaryCategory: primaryCategory,
+                secondaryCategories: secondaryCategories
             });
         }
         return result;
@@ -191,15 +177,18 @@
     function processData() {
         categories = {};
         posts.forEach(p => {
-            // Split by comma or pipe, trim whitespace
-            const cats = p.category.split(/[,\x7C]/).map(c => c.trim()).filter(c => c);
+            const allCats = [p.primaryCategory, ...p.secondaryCategories];
             
-            cats.forEach(cat => {
+            allCats.forEach(cat => {
                 if (!categories[cat]) {
-                    categories[cat] = { posts: [], topics: new Set() };
+                    categories[cat] = { posts: [], secondaryOf: new Set() };
                 }
-                categories[cat].posts.push(p);
-                if (p.topic) categories[cat].topics.add(p.topic);
+                if (!categories[cat].posts.find(x => x.idx === p.idx)) {
+                    categories[cat].posts.push(p);
+                }
+                if (cat !== p.primaryCategory) {
+                    categories[cat].secondaryOf.add(p.primaryCategory);
+                }
             });
         });
     }
@@ -253,8 +242,8 @@
             const pct = Math.round((count / maxCount) * 100);
             const health = getHealthClass(count, maxCount);
             const color = getCatColor(i);
-            const topicPills = [...data.topics].slice(0, 5).map(t =>
-                `<span class="topic-pill">${esc(t)}</span>`
+            const secondaryPills = [...data.secondaryOf].slice(0, 3).map(t =>
+                `<span class="topic-pill">Sub of: ${esc(t)}</span>`
             ).join('');
 
             return `
@@ -266,7 +255,7 @@
                     <div class="cat-card-bar">
                         <div class="cat-card-bar-fill" style="width:${pct}%; background:${color};"></div>
                     </div>
-                    ${topicPills ? `<div class="cat-card-topics">${topicPills}</div>` : '<div style="font-size:0.75rem;color:var(--text-muted);">No topics tagged</div>'}
+                    ${secondaryPills ? `<div class="cat-card-topics">${secondaryPills}</div>` : '<div style="font-size:0.75rem;color:var(--text-muted);">Top Level Category</div>'}
                 </div>
             `;
         }).join('');
@@ -324,9 +313,9 @@
                 const priority = count <= 1 ? 'high' : count <= thinThreshold / 2 ? 'medium' : 'low';
                 const catKey = name.toLowerCase();
 
-                // Find matching topic suggestions
+                // Find matching topic suggestions from the extensive KNOWLEDGE_BASE
                 let ideas = [];
-                for (const [key, suggestions] of Object.entries(TOPIC_SUGGESTIONS)) {
+                for (const [key, suggestions] of Object.entries(KNOWLEDGE_BASE)) {
                     if (catKey.includes(key) || key.includes(catKey)) {
                         // Filter out ideas that already seem covered
                         const existingTitles = data.posts.map(p => p.title.toLowerCase());
@@ -437,9 +426,9 @@
                         </div>
                         ${crossLinks.map(p => `
                             <div class="link-item">
-                                <div class="link-from"><strong>${esc(p.from.title)}</strong><br><a href="${BLOG_PREFIX}${esc(p.from.slug)}" target="_blank" class="slug-link">${esc(p.from.category)}</a></div>
+                                <div class="link-from"><strong>${esc(p.from.title)}</strong><br><a href="${BLOG_PREFIX}${esc(p.from.slug)}" target="_blank" class="slug-link">${esc(p.from.primaryCategory)}</a></div>
                                 <div class="link-arrow">→</div>
-                                <div class="link-to"><strong>${esc(p.to.title)}</strong><br><a href="${BLOG_PREFIX}${esc(p.to.slug)}" target="_blank" class="slug-link">${esc(p.to.category)}</a></div>
+                                <div class="link-to"><strong>${esc(p.to.title)}</strong><br><a href="${BLOG_PREFIX}${esc(p.to.slug)}" target="_blank" class="slug-link">${esc(p.to.primaryCategory)}</a></div>
                             </div>
                         `).join('')}
                     </div>
@@ -483,15 +472,15 @@
         let filtered = [...posts];
 
         if (filter && filter !== 'all') {
-            filtered = filtered.filter(p => p.category === filter);
+            filtered = filtered.filter(p => [p.primaryCategory, ...p.secondaryCategories].includes(filter));
         }
         if (search) {
             const q = search.toLowerCase();
             filtered = filtered.filter(p =>
                 p.title.toLowerCase().includes(q) ||
                 p.slug.toLowerCase().includes(q) ||
-                p.category.toLowerCase().includes(q) ||
-                p.topic.toLowerCase().includes(q)
+                p.primaryCategory.toLowerCase().includes(q) ||
+                p.secondaryCategories.some(c => c.toLowerCase().includes(q))
             );
         }
 
@@ -506,8 +495,8 @@
         tbody.innerHTML = filtered.map(p => `
             <tr>
                 <td>${esc(p.title)}</td>
-                <td>${esc(p.category)}</td>
-                <td>${esc(p.topic || '—')}</td>
+                <td>${esc(p.primaryCategory)}</td>
+                <td>${esc(p.secondaryCategories.join(', ') || '—')}</td>
                 <td><a href="${BLOG_PREFIX}${esc(p.slug)}" target="_blank" class="slug-link">${esc(p.slug)}</a></td>
             </tr>
         `).join('');
@@ -522,20 +511,23 @@
         const data = categories[catName];
         if (!data) return;
 
-        const topicGroups = {};
-        data.posts.forEach(p => {
-            const t = p.topic || 'Uncategorised';
-            if (!topicGroups[t]) topicGroups[t] = [];
-            topicGroups[t].push(p);
-        });
+        const primaryPosts = data.posts.filter(p => p.primaryCategory === catName);
+        const secondaryPosts = data.posts.filter(p => p.primaryCategory !== catName);
 
-        let html = `<h3>${esc(catName)}</h3><p class="modal-subtitle">${data.posts.length} post${data.posts.length !== 1 ? 's' : ''} · ${data.topics.size} topic${data.topics.size !== 1 ? 's' : ''}</p>`;
+        let html = `<h3>${esc(catName)}</h3><p class="modal-subtitle">${data.posts.length} total post${data.posts.length !== 1 ? 's' : ''}</p>`;
 
-        for (const [topic, topicPosts] of Object.entries(topicGroups)) {
-            html += `<h4 style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin:20px 0 8px;">${esc(topic)}</h4>`;
-            html += `<ul class="modal-post-list">`;
-            topicPosts.forEach(p => {
+        if (primaryPosts.length > 0) {
+            html += `<h4 style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin:20px 0 8px;">Primary Posts</h4><ul class="modal-post-list">`;
+            primaryPosts.forEach(p => {
                 html += `<li><span class="modal-post-title">${esc(p.title)}</span><a href="${BLOG_PREFIX}${esc(p.slug)}" target="_blank" class="slug-link">${esc(p.slug)}</a></li>`;
+            });
+            html += `</ul>`;
+        }
+
+        if (secondaryPosts.length > 0) {
+            html += `<h4 style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin:20px 0 8px;">Secondary Posts</h4><ul class="modal-post-list">`;
+            secondaryPosts.forEach(p => {
+                html += `<li><span class="modal-post-title">${esc(p.title)} <span style="font-size:0.7rem; color:var(--text-muted)">(Primary: ${esc(p.primaryCategory)})</span></span><a href="${BLOG_PREFIX}${esc(p.slug)}" target="_blank" class="slug-link">${esc(p.slug)}</a></li>`;
             });
             html += `</ul>`;
         }
@@ -557,6 +549,176 @@
     }
 
     // ───────────────────────────────────────
+    //  RENDER: MINDMAP (D3.js)
+    // ───────────────────────────────────────
+    function renderMindmap() {
+        if (typeof d3 === 'undefined') return;
+        const container = document.getElementById('mindmap-container');
+        container.innerHTML = '';
+        const width = container.clientWidth || 1000;
+        const height = container.clientHeight || 600;
+        
+        const rootData = { name: "Lawsons Blog", children: [] };
+        const cats = Object.keys(categories).sort();
+        
+        cats.forEach(catName => {
+            const data = categories[catName];
+            const primaryPosts = data.posts.filter(p => p.primaryCategory === catName);
+            
+            if (primaryPosts.length > 0) {
+                const node = { 
+                    name: catName, 
+                    children: primaryPosts.map(p => ({ name: p.title }))
+                };
+                rootData.children.push(node);
+            }
+        });
+
+        const root = d3.hierarchy(rootData);
+        
+        const svg = d3.select("#mindmap-container").append("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .call(d3.zoom().on("zoom", (e) => svg.select('g').attr("transform", e.transform)))
+            .append("g")
+            .attr("transform", "translate(120,50)");
+
+        const treeLayout = d3.tree().nodeSize([20, 250]);
+        treeLayout(root);
+
+        // Add Links
+        svg.selectAll('.link')
+            .data(root.links())
+            .join('path')
+            .classed('link', true)
+            .attr('d', d3.linkHorizontal().x(d => d.y).y(d => d.x));
+
+        // Add Nodes
+        const nodes = svg.selectAll('.node')
+            .data(root.descendants())
+            .join('g')
+            .classed('node', true)
+            .attr('transform', d => `translate(${d.y},${d.x})`);
+
+        nodes.append('circle').attr('r', 5);
+        nodes.append('text')
+            .attr('dy', '0.31em')
+            .attr('x', d => d.children ? -8 : 8)
+            .attr('text-anchor', d => d.children ? 'end' : 'start')
+            .text(d => d.data.name)
+            .clone(true).lower()
+            .attr('stroke', 'var(--bg-card)')
+            .attr('stroke-width', 4);
+    }
+
+    // ───────────────────────────────────────
+    //  RENDER: CATEGORY MANAGER
+    // ───────────────────────────────────────
+    function renderCategoryManager(searchQuery = '') {
+        const listEl = document.getElementById('manage-list');
+        const allCats = Array.from(new Set(posts.flatMap(p => [p.primaryCategory, ...p.secondaryCategories]))).sort();
+        
+        let filtered = posts;
+        if (searchQuery) {
+            const q = searchQuery.toLowerCase();
+            filtered = posts.filter(p => p.title.toLowerCase().includes(q) || p.slug.toLowerCase().includes(q));
+        }
+
+        listEl.innerHTML = filtered.map(p => {
+            const selectOptions = allCats.map(c => 
+                `<option value="${esc(c)}" ${c === p.primaryCategory ? 'selected' : ''}>${esc(c)}</option>`
+            ).join('');
+
+            const secondaryCheckboxes = allCats.map(c => {
+                if (c === p.primaryCategory) return '';
+                const checked = p.secondaryCategories.includes(c) ? 'checked' : '';
+                return `
+                    <label class="secondary-cat-item">
+                        <input type="checkbox" class="chk-styled chk-secondary" data-post-idx="${p.idx}" value="${esc(c)}" ${checked}>
+                        ${esc(c)}
+                    </label>
+                `;
+            }).join('');
+
+            return `
+                <div class="manage-card">
+                    <div class="manage-header">
+                        <div>
+                            <span class="manage-title">${esc(p.title)}</span>
+                            <span class="manage-slug">/${esc(p.slug)}</span>
+                        </div>
+                    </div>
+                    <div class="manage-categories">
+                        <div class="manage-select-wrapper">
+                            <span class="manage-label">Primary Category</span>
+                            <select class="input-styled sel-primary" data-post-idx="${p.idx}">
+                                ${selectOptions}
+                            </select>
+                        </div>
+                        <div class="manage-select-wrapper" style="flex:3;">
+                            <span class="manage-label">Secondary Categories</span>
+                            <div class="secondary-cat-grid">
+                                ${secondaryCheckboxes}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        // Bind events
+        listEl.querySelectorAll('.sel-primary').forEach(sel => {
+            sel.addEventListener('change', e => {
+                const idx = parseInt(e.target.dataset.postIdx);
+                const post = posts.find(p => p.idx === idx);
+                post.primaryCategory = e.target.value;
+                post.secondaryCategories = post.secondaryCategories.filter(c => c !== post.primaryCategory);
+                renderAll();
+                renderCategoryManager(document.getElementById('manage-search').value);
+            });
+        });
+
+        listEl.querySelectorAll('.chk-secondary').forEach(chk => {
+            chk.addEventListener('change', e => {
+                const idx = parseInt(e.target.dataset.postIdx);
+                const post = posts.find(p => p.idx === idx);
+                const val = e.target.value;
+                
+                if (e.target.checked) {
+                    if (!post.secondaryCategories.includes(val)) post.secondaryCategories.push(val);
+                } else {
+                    post.secondaryCategories = post.secondaryCategories.filter(c => c !== val);
+                }
+                renderAll();
+            });
+        });
+    }
+
+    // ───────────────────────────────────────
+    //  EXPORT TO CSV
+    // ───────────────────────────────────────
+    function exportCSV() {
+        const header = ['slug', 'title', 'category'];
+        const rows = posts.map(p => {
+            const catStr = [p.primaryCategory, ...p.secondaryCategories].join(', ');
+            return [
+                `"${p.slug.replace(/"/g, '""')}"`,
+                `"${p.title.replace(/"/g, '""')}"`,
+                `"${catStr.replace(/"/g, '""')}"`
+            ].join(',');
+        });
+        
+        const csvContent = "data:text/csv;charset=utf-8," + [header.join(','), ...rows].join('\n');
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "lawsons-blog-map-export.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    // ───────────────────────────────────────
     //  MAIN RENDER PIPELINE
     // ───────────────────────────────────────
     function renderAll() {
@@ -567,6 +729,18 @@
         renderInternalLinks('all');
         renderTable('all', '');
         populateFilters();
+        
+        // Let Mindmap redraw if tab is active
+        const mindmapTab = document.querySelector('.tab[data-tab="mindmap"]');
+        if (mindmapTab && mindmapTab.classList.contains('active')) {
+            renderMindmap();
+        }
+        
+        // Re-render manage list if active
+        const manageTab = document.querySelector('.tab[data-tab="manage"]');
+        if (manageTab && manageTab.classList.contains('active')) {
+            renderCategoryManager(document.getElementById('manage-search').value);
+        }
     }
 
     // ───────────────────────────────────────
@@ -656,6 +830,35 @@
             document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
             tab.classList.add('active');
             document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+            
+            if (tab.dataset.tab === 'mindmap') {
+                setTimeout(renderMindmap, 50); // Redraw map to container bounds
+            }
+            if (tab.dataset.tab === 'manage') {
+                renderCategoryManager(document.getElementById('manage-search').value);
+            }
+        });
+
+        // Global Event Listeners for new features
+        document.getElementById('btn-export-csv').addEventListener('click', exportCSV);
+
+        document.getElementById('btn-add-global-category').addEventListener('click', () => {
+            const newCat = prompt('Enter name for the new category:');
+            if (newCat && newCat.trim()) {
+                const catName = newCat.trim();
+                // Assign to first post safely to persist category structure initially
+                if (posts.length > 0) {
+                    if (!posts[0].secondaryCategories.includes(catName)) {
+                        posts[0].secondaryCategories.push(catName);
+                    }
+                }
+                renderAll();
+                renderCategoryManager(document.getElementById('manage-search').value);
+            }
+        });
+
+        document.getElementById('manage-search').addEventListener('input', e => {
+            renderCategoryManager(e.target.value);
         });
 
         // Modal close

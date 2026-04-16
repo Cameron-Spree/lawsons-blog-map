@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 <body>
     <!-- ═══ UPLOAD SCREEN ═══ -->
@@ -39,7 +40,7 @@
 
             <div class="csv-format-hint">
                 <p><strong>Expected columns:</strong> <code>slug</code>, <code>title</code>, <code>category</code></p>
-                <p class="optional-hint">Optional: <code>topic</code> column for sub-grouping</p>
+                <p class="optional-hint">Multiple categories can be separated by commas (e.g., <code>Landscaping, Sleepers</code>). First category becomes Primary.</p>
             </div>
         </div>
     </section>
@@ -57,6 +58,10 @@
                     <svg id="theme-icon-dark" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
                     <svg id="theme-icon-light" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
                 </button>
+                <button id="btn-export-csv" class="btn btn-ghost" title="Export data to CSV">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Export
+                </button>
                 <button id="btn-new-upload" class="btn btn-ghost" title="Upload new CSV">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                     Re-upload
@@ -72,6 +77,14 @@
             <button class="tab active" data-tab="overview">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
                 Content Map
+            </button>
+            <button class="tab" data-tab="mindmap">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                Mindmap
+            </button>
+            <button class="tab" data-tab="manage">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                Manage Categories
             </button>
             <button class="tab" data-tab="gaps">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -96,6 +109,35 @@
                     <p>Each card represents a category. Card size reflects post count — small cards highlight thin content areas.</p>
                 </div>
                 <div id="category-grid" class="category-grid"></div>
+            </div>
+
+            <!-- MINDMAP TAB -->
+            <div class="panel" id="panel-mindmap" style="padding:0;">
+                <div class="panel-header" style="padding: 32px 32px 0 32px; margin-bottom: 0;">
+                    <h3>Content Mindmap</h3>
+                    <p>A visual tree of your Primary and Secondary categories. Scroll to zoom, click and drag to pan.</p>
+                </div>
+                <div id="mindmap-container" class="mindmap-container"></div>
+            </div>
+
+            <!-- MANAGE CATEGORIES TAB -->
+            <div class="panel" id="panel-manage">
+                <div class="panel-header">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                        <div>
+                            <h3>Manage Categories</h3>
+                            <p>Assign Primary and Secondary categories to your posts. These changes will reflect immediately across all tabs.</p>
+                        </div>
+                        <button id="btn-add-global-category" class="btn btn-ghost">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            Add New Category
+                        </button>
+                    </div>
+                </div>
+                <div class="table-controls">
+                    <input type="text" id="manage-search" class="input-styled" placeholder="Search posts to manage…">
+                </div>
+                <div id="manage-list" class="manage-list"></div>
             </div>
 
             <!-- GAP ANALYSIS TAB -->
@@ -138,8 +180,8 @@
                         <thead>
                             <tr>
                                 <th data-sort="title">Title <span class="sort-icon">↕</span></th>
-                                <th data-sort="category">Category <span class="sort-icon">↕</span></th>
-                                <th data-sort="topic">Topic <span class="sort-icon">↕</span></th>
+                                <th>Primary Category</th>
+                                <th>Secondary Categories</th>
                                 <th data-sort="slug">Slug</th>
                             </tr>
                         </thead>
