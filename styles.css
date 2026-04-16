@@ -78,17 +78,23 @@ body {
     color: var(--text-primary);
     line-height: 1.6;
     min-height: 100vh;
-    overflow: hidden;
 }
 
 /* ═══ SCREENS ═══ */
-.dashboard {
+.screen {
     display: none;
-    flex-direction: column;
-    height: 100vh;
     animation: fadeIn 0.4s ease forwards;
 }
 .screen.active { display: block; }
+
+#dashboard {
+    display: none;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+    animation: none; /* Let .screen handle it if needed */
+}
+#dashboard.active { display: flex; }
 
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
