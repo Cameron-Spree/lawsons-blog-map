@@ -334,7 +334,7 @@
                         const existingTitles = data.posts.map(p => p.title.toLowerCase());
                         ideas = suggestions.filter(s =>
                             !existingTitles.some(t => similarity(t, s.toLowerCase()) > 0.5)
-                        ).slice(0, 5);
+                        ).slice(0, 15);
                         break;
                     }
                 }
@@ -561,19 +561,58 @@
     // ───────────────────────────────────────
     //  RENDER: FRESHNESS
     // ───────────────────────────────────────
-    function renderFreshness() {
+    function renderFreshness(statusFilter = 'all', categoryFilter = 'all') {
         const listEl = document.getElementById('freshness-list');
-        if (!listEl) return;
+        const statsEl = document.getElementById('freshness-stats');
+        if (!listEl || !statsEl) return;
         
         const datedPosts = posts.filter(p => p.publishTimestamp).sort((a, b) => a.publishTimestamp - b.publishTimestamp);
         const now = new Date().getTime();
         const oneYear = 1000 * 60 * 60 * 24 * 365.25;
 
-        listEl.innerHTML = datedPosts.map(p => {
+        // Calculate stats
+        let staleCount = 0;
+        let freshCount = 0;
+
+        const filteredPosts = datedPosts.filter(p => {
+            const ageMs = now - p.publishTimestamp;
+            const isStale = ageMs > oneYear;
+            
+            p._isStale = isStale;
+            if (isStale) staleCount++; else freshCount++;
+
+            if (statusFilter === 'stale' && !isStale) return false;
+            if (statusFilter === 'fresh' && isStale) return false;
+            
+            if (categoryFilter !== 'all' && p.primaryCategory !== categoryFilter && !p.secondaryCategories.includes(categoryFilter)) {
+                return false;
+            }
+
+            return true;
+        });
+
+        // Render Stats
+        statsEl.innerHTML = `
+            <div class="freshness-stats-bar">
+                <div class="freshness-stat-item">
+                    <span class="freshness-stat-val">${datedPosts.length}</span>
+                    <span class="freshness-stat-label">Total Dated Posts</span>
+                </div>
+                <div class="freshness-stat-item">
+                    <span class="freshness-stat-val" style="color:var(--status-critical);">${staleCount}</span>
+                    <span class="freshness-stat-label">Needs Update (&gt;12mo)</span>
+                </div>
+                <div class="freshness-stat-item">
+                    <span class="freshness-stat-val" style="color:var(--status-good);">${freshCount}</span>
+                    <span class="freshness-stat-label">Fresh Content</span>
+                </div>
+            </div>
+        `;
+
+        listEl.innerHTML = filteredPosts.map(p => {
             const ageMs = now - p.publishTimestamp;
             const yearsOld = (ageMs / oneYear).toFixed(1);
-            const isStale = ageMs > oneYear;
-            const badgeClass = isStale ? 'status-critical' : 'status-good';
+            const badgeClass = p._isStale ? 'status-critical' : 'status-good';
 
             return `
                 <div class="manage-card" style="display:flex; justify-content:space-between; align-items:center;">
@@ -581,16 +620,21 @@
                         <span class="manage-title">${esc(p.title)}</span>
                         ${p.liveStatus === true ? '<span class="post-status status-live">Live</span>' : 
                           p.liveStatus === false ? '<span class="post-status status-404">404</span>' : ''}
-                        <span class="manage-slug" style="display:block; margin-top:6px;">Published: <strong>${esc(p.publishDateStr)}</strong> (${yearsOld} years ago)</span>
+                        <span class="manage-slug" style="display:block; margin-top:6px;">Published: <strong>${esc(p.publishDateStr)}</strong> (${yearsOld} years)</span>
                     </div>
                     <div>
-                        <span class="post-status" style="color:var(--${badgeClass}); border: 1px solid var(--border-light); background: var(--bg-card); padding:4px 8px; font-size:0.7rem;">${isStale ? '⚠️ Needs Update' : '✅ Fresh'}</span>
+                        <span class="post-status" style="color:var(--${badgeClass}); border: 1px solid var(--border-light); background: var(--bg-card); padding:4px 8px; font-size:0.7rem;">${p._isStale ? '⚠️ Update' : '✅ Fresh'}</span>
                     </div>
                 </div>
             `;
         }).join('');
         
-        if (datedPosts.length === 0) listEl.innerHTML = '<p style="padding:40px; text-align:center; color:var(--text-muted);">No published dates found in CSV.</p>';
+        if (datedPosts.length === 0) {
+            statsEl.innerHTML = '';
+            listEl.innerHTML = '<p style="padding:40px; text-align:center; color:var(--text-muted); grid-column: 1 / -1;">No published dates found in CSV.</p>';
+        } else if (filteredPosts.length === 0) {
+            listEl.innerHTML = '<p style="padding:40px; text-align:center; color:var(--text-muted); grid-column: 1 / -1;">No posts match your filters.</p>';
+        }
     }
 
     // ───────────────────────────────────────
@@ -603,69 +647,140 @@
 
         document.getElementById('link-category-filter').innerHTML = options;
         document.getElementById('table-category-filter').innerHTML = options;
+        document.getElementById('freshness-category-filter').innerHTML = options;
     }
 
     // ───────────────────────────────────────
     //  RENDER: MINDMAP (D3.js)
     // ───────────────────────────────────────
+    let mindmapRoot = null;
+    let mindmapSvgGroup = null;
+
     function renderMindmap() {
         if (typeof d3 === 'undefined') return;
         const container = document.getElementById('mindmap-container');
-        container.innerHTML = '';
         const width = container.clientWidth || 1000;
-        const height = container.clientHeight || 600;
-        
-        const rootData = { name: "Lawsons Blog", children: [] };
+        const height = container.clientHeight || 800;
+        const radius = Math.min(width, height) / 2;
+
+        if (!mindmapSvgGroup) {
+            container.innerHTML = '';
+            const svg = d3.select("#mindmap-container").append("svg")
+                .attr("width", width)
+                .attr("height", height)
+                .call(d3.zoom().on("zoom", (e) => mindmapSvgGroup.attr("transform", e.transform)));
+            
+            mindmapSvgGroup = svg.append("g")
+                .attr("transform", `translate(${width/2},${height/2}) scale(0.6)`);
+        } else {
+            mindmapSvgGroup.selectAll("*").remove();
+        }
+
+        const treeLayout = d3.tree()
+            .size([2 * Math.PI, radius])
+            .separation((a, b) => (a.parent == b.parent ? 1 : 2) / a.depth);
+
+        // Always rebuild data structure in case categories changed
+        const rootData = { name: "Lawsons", children: [] };
         const cats = Object.keys(categories).sort();
         
         cats.forEach(catName => {
-            const data = categories[catName];
-            const primaryPosts = data.posts.filter(p => p.primaryCategory === catName);
-            
+            const primaryPosts = categories[catName].posts.filter(p => p.primaryCategory === catName);
             if (primaryPosts.length > 0) {
-                const node = { 
+                rootData.children.push({ 
                     name: catName, 
                     children: primaryPosts.map(p => ({ name: p.title }))
-                };
-                rootData.children.push(node);
+                });
             }
         });
 
-        const root = d3.hierarchy(rootData);
+        mindmapRoot = d3.hierarchy(rootData);
         
-        const svg = d3.select("#mindmap-container").append("svg")
-            .attr("width", width)
-            .attr("height", height)
-            .call(d3.zoom().on("zoom", (e) => svg.select('g').attr("transform", e.transform)))
-            .append("g")
-            .attr("transform", "translate(120,50)");
+        function collapse(d) {
+            if(d.children) {
+                d._children = d.children;
+                d._children.forEach(collapse);
+                d.children = null;
+            }
+        }
+        
+        // Collapse the outermost leaves (the posts) by default to avoid visual clutter
+        if(mindmapRoot.children) {
+            mindmapRoot.children.forEach(collapse);
+        }
 
-        const treeLayout = d3.tree().nodeSize([20, 250]);
-        treeLayout(root);
+        function update(source) {
+            treeLayout(mindmapRoot);
 
-        // Add Links
-        svg.selectAll('.link')
-            .data(root.links())
-            .join('path')
-            .classed('link', true)
-            .attr('d', d3.linkHorizontal().x(d => d.y).y(d => d.x));
+            const link = mindmapSvgGroup.selectAll(".link")
+                .data(mindmapRoot.links(), d => d.target.data.name + d.target.depth);
 
-        // Add Nodes
-        const nodes = svg.selectAll('.node')
-            .data(root.descendants())
-            .join('g')
-            .classed('node', true)
-            .attr('transform', d => `translate(${d.y},${d.x})`);
+            link.enter()
+                .insert("path", "g")
+                .attr("class", "link")
+                .attr("d", d3.linkRadial()
+                    .angle(d => d.x)
+                    .radius(d => d.y)
+                )
+                .attr("stroke", "var(--border)")
+                .attr("fill", "none")
+                .style("stroke-opacity", 0.5);
 
-        nodes.append('circle').attr('r', 5);
-        nodes.append('text')
-            .attr('dy', '0.31em')
-            .attr('x', d => d.children ? -8 : 8)
-            .attr('text-anchor', d => d.children ? 'end' : 'start')
-            .text(d => d.data.name)
-            .clone(true).lower()
-            .attr('stroke', 'var(--bg-card)')
-            .attr('stroke-width', 4);
+            link.transition().duration(500)
+                .attr("d", d3.linkRadial()
+                    .angle(d => d.x)
+                    .radius(d => d.y)
+                );
+            link.exit().remove();
+
+            const node = mindmapSvgGroup.selectAll(".node")
+                .data(mindmapRoot.descendants(), d => d.data.name + d.depth);
+
+            const nodeEnter = node.enter()
+                .append("g")
+                .attr("class", "node")
+                .attr("transform", d => `translate(${d3.pointRadial(d.x, d.y)})`)
+                .style("cursor", "pointer")
+                .on("click", (event, d) => {
+                    if (d.children) {
+                        d._children = d.children;
+                        d.children = null;
+                    } else {
+                        d.children = d._children;
+                        d._children = null;
+                    }
+                    update(d);
+                });
+
+            nodeEnter.append("circle")
+                .attr("r", d => d.depth === 0 ? 12 : 6)
+                .attr("fill", d => d._children ? "var(--accent)" : "var(--bg-card)")
+                .attr("stroke", "var(--accent)")
+                .attr("stroke-width", 2);
+
+            nodeEnter.append("text")
+                .attr("dy", "0.31em")
+                .attr("x", d => d.x < Math.PI === !d.children ? 12 : -12)
+                .attr("text-anchor", d => d.x < Math.PI === !d.children ? "start" : "end")
+                .attr("transform", d => d.x >= Math.PI ? "rotate(180)" : null)
+                .text(d => d.data.name)
+                .style("fill", "var(--text-primary)")
+                .style("font-size", d => d.depth === 0 ? "1.2rem" : d.depth === 1 ? "0.9rem" : "0.75rem")
+                .style("font-weight", d => d.depth <= 1 ? "bold" : "normal")
+                .clone(true).lower()
+                .style("stroke", "var(--bg-base)")
+                .style("stroke-width", "5px");
+
+            node.transition().duration(500)
+                .attr("transform", d => `translate(${d3.pointRadial(d.x, d.y)})`);
+            
+            node.select("circle")
+                .attr("fill", d => d._children ? "var(--accent)" : "var(--bg-card)");
+
+            node.exit().remove();
+        }
+
+        update(mindmapRoot);
     }
 
     // ───────────────────────────────────────
@@ -674,24 +789,26 @@
     function renderCategoryManager(searchQuery = '') {
         const listEl = document.getElementById('manage-list');
         const allCats = Array.from(new Set(posts.flatMap(p => [p.primaryCategory, ...p.secondaryCategories]))).sort();
+        const primaryCats = Array.from(new Set(posts.map(p => p.primaryCategory))).sort();
         
-        let filtered = posts;
+        let filteredCats = primaryCats;
         if (searchQuery) {
             const q = searchQuery.toLowerCase();
-            filtered = posts.filter(p => p.title.toLowerCase().includes(q) || p.slug.toLowerCase().includes(q));
+            filteredCats = primaryCats.filter(c => c.toLowerCase().includes(q));
         }
 
-        listEl.innerHTML = filtered.map(p => {
-            const selectOptions = allCats.map(c => 
-                `<option value="${esc(c)}" ${c === p.primaryCategory ? 'selected' : ''}>${esc(c)}</option>`
-            ).join('');
+        listEl.innerHTML = filteredCats.map(primary => {
+            const currentSecondaries = Array.from(new Set(
+                posts.filter(p => p.primaryCategory === primary)
+                     .flatMap(p => p.secondaryCategories)
+            )).sort();
 
             const secondaryCheckboxes = allCats.map(c => {
-                if (c === p.primaryCategory) return '';
-                const checked = p.secondaryCategories.includes(c) ? 'checked' : '';
+                if (c === primary) return '';
+                const isSelected = currentSecondaries.includes(c);
                 return `
                     <label class="secondary-cat-item">
-                        <input type="checkbox" class="chk-styled chk-secondary" data-post-idx="${p.idx}" value="${esc(c)}" ${checked}>
+                        <input type="checkbox" class="chk-styled chk-global-secondary" data-primary="${esc(primary)}" value="${esc(c)}" ${isSelected ? 'checked' : ''}>
                         ${esc(c)}
                     </label>
                 `;
@@ -701,21 +818,14 @@
                 <div class="manage-card">
                     <div class="manage-header">
                         <div>
-                            <span class="manage-title">${esc(p.title)}</span>
-                            ${p.liveStatus === true ? '<span class="post-status status-live">Live</span>' : 
-                              p.liveStatus === false ? '<span class="post-status status-404">404</span>' : ''}
-                            <span class="manage-slug">/${esc(p.slug)}</span>
+                            <span class="manage-title" style="font-size:1.2rem;">${esc(primary)}</span>
+                            <span class="manage-slug" style="display:block; margin-top:6px;">Top-Level Primary Category</span>
                         </div>
                     </div>
                     <div class="manage-categories">
-                        <div class="manage-select-wrapper">
-                            <span class="manage-label">Primary Category</span>
-                            <select class="input-styled sel-primary" data-post-idx="${p.idx}">
-                                ${selectOptions}
-                            </select>
-                        </div>
-                        <div class="manage-select-wrapper" style="flex:3;">
-                            <span class="manage-label">Secondary Categories</span>
+                        <div class="manage-select-wrapper" style="flex:1;">
+                            <span class="manage-label">Encompassed Sub-Categories</span>
+                            <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:12px;">Selecting a category here assigns all posts with that sub-category to sit under <strong>${esc(primary)}</strong>.</p>
                             <div class="secondary-cat-grid">
                                 ${secondaryCheckboxes}
                             </div>
@@ -725,30 +835,28 @@
             `;
         }).join('');
 
-        // Bind events
-        listEl.querySelectorAll('.sel-primary').forEach(sel => {
-            sel.addEventListener('change', e => {
-                const idx = parseInt(e.target.dataset.postIdx);
-                const post = posts.find(p => p.idx === idx);
-                post.primaryCategory = e.target.value;
-                post.secondaryCategories = post.secondaryCategories.filter(c => c !== post.primaryCategory);
-                renderAll();
-                renderCategoryManager(document.getElementById('manage-search').value);
-            });
-        });
-
-        listEl.querySelectorAll('.chk-secondary').forEach(chk => {
+        listEl.querySelectorAll('.chk-global-secondary').forEach(chk => {
             chk.addEventListener('change', e => {
-                const idx = parseInt(e.target.dataset.postIdx);
-                const post = posts.find(p => p.idx === idx);
-                const val = e.target.value;
+                const targetPrimary = e.target.dataset.primary;
+                const secondaryCat = e.target.value;
+                const isChecked = e.target.checked;
                 
-                if (e.target.checked) {
-                    if (!post.secondaryCategories.includes(val)) post.secondaryCategories.push(val);
+                if (isChecked) {
+                    posts.forEach(p => {
+                        if (p.secondaryCategories.includes(secondaryCat)) {
+                            p.primaryCategory = targetPrimary;
+                        }
+                    });
                 } else {
-                    post.secondaryCategories = post.secondaryCategories.filter(c => c !== val);
+                    posts.forEach(p => {
+                        if (p.primaryCategory === targetPrimary && p.secondaryCategories.includes(secondaryCat)) {
+                            p.primaryCategory = secondaryCat;
+                            p.secondaryCategories = p.secondaryCategories.filter(c => c !== secondaryCat);
+                        }
+                    });
                 }
                 renderAll();
+                renderCategoryManager(document.getElementById('manage-search').value);
             });
         });
     }
@@ -932,7 +1040,7 @@
                 renderCategoryManager(document.getElementById('manage-search').value);
             }
             if (tab.dataset.tab === 'freshness') {
-                renderFreshness();
+                renderFreshness('all', 'all');
             }
         });
 
@@ -1004,6 +1112,21 @@
                     document.getElementById('table-search').value
                 );
             });
+        });
+
+        // Freshness Filters
+        document.getElementById('freshness-status-filter').addEventListener('change', () => {
+            renderFreshness(
+                document.getElementById('freshness-status-filter').value,
+                document.getElementById('freshness-category-filter').value
+            );
+        });
+        
+        document.getElementById('freshness-category-filter').addEventListener('change', () => {
+            renderFreshness(
+                document.getElementById('freshness-status-filter').value,
+                document.getElementById('freshness-category-filter').value
+            );
         });
     }
 

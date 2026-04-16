@@ -174,11 +174,24 @@
 
             <!-- CONTENT FRESHNESS TAB -->
             <div class="panel" id="panel-freshness">
-                <div class="panel-header">
+                <div class="panel-header" style="margin-bottom: 20px;">
                     <h3>Content Freshness</h3>
-                    <p>Posts below are ordered by age. Consider updating those over 12 months old.</p>
+                    <p>Posts below are ordered by age. Consider updating those over 12 months old to regain SEO momentum.</p>
                 </div>
-                <div id="freshness-list" class="manage-list"></div>
+                <div id="freshness-stats"></div>
+                
+                <div class="table-controls" style="margin-bottom: 24px; display:flex; gap: 12px;">
+                    <select id="freshness-status-filter" class="input-styled" style="max-width:200px;">
+                        <option value="all">All Statuses</option>
+                        <option value="stale">⚠️ Needs Update (&gt;12mo)</option>
+                        <option value="fresh">✅ Fresh (&lt;12mo)</option>
+                    </select>
+                    <select id="freshness-category-filter" class="input-styled" style="max-width:200px;">
+                        <option value="all">All Categories</option>
+                    </select>
+                </div>
+                
+                <div id="freshness-list" class="freshness-grid"></div>
             </div>
 
             <!-- TABLE TAB -->
