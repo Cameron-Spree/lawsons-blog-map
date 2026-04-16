@@ -970,3 +970,30 @@ body {
     border: 1px solid var(--border-light);
 }
 
+/* ═══ STATUS BADGES ═══ */
+.post-status {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 8px;
+    display: inline-block;
+    vertical-align: middle;
+}
+.status-live {
+    background: rgba(102, 187, 106, 0.15);
+    color: var(--status-good);
+    border: 1px solid rgba(102, 187, 106, 0.3);
+}
+.status-404 {
+    background: rgba(239, 83, 80, 0.15);
+    color: var(--status-critical);
+    border: 1px solid rgba(239, 83, 80, 0.3);
+}
+.status-pending {
+    background: rgba(148, 163, 184, 0.15);
+    color: var(--text-muted);
+}
+
+

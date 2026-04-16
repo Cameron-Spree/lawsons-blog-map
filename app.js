@@ -133,7 +133,8 @@
                 slug: slugIdx !== -1 ? (cols[slugIdx] || '').trim() : slugify(title),
                 title: title,
                 primaryCategory: primaryCategory,
-                secondaryCategories: secondaryCategories
+                secondaryCategories: secondaryCategories,
+                liveStatus: null
             });
         }
         return result;
@@ -492,14 +493,18 @@
             });
         }
 
-        tbody.innerHTML = filtered.map(p => `
+        tbody.innerHTML = filtered.map(p => {
+            const badge = p.liveStatus === true ? '<span class="post-status status-live">Live</span>' :
+                          p.liveStatus === false ? '<span class="post-status status-404">404</span>' : '';
+            return `
             <tr>
-                <td>${esc(p.title)}</td>
+                <td>${esc(p.title)} ${badge}</td>
                 <td>${esc(p.primaryCategory)}</td>
                 <td>${esc(p.secondaryCategories.join(', ') || '—')}</td>
                 <td><a href="${BLOG_PREFIX}${esc(p.slug)}" target="_blank" class="slug-link">${esc(p.slug)}</a></td>
             </tr>
-        `).join('');
+            `;
+        }).join('');
     }
 
     // ───────────────────────────────────────
@@ -519,7 +524,9 @@
         if (primaryPosts.length > 0) {
             html += `<h4 style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin:20px 0 8px;">Primary Posts</h4><ul class="modal-post-list">`;
             primaryPosts.forEach(p => {
-                html += `<li><span class="modal-post-title">${esc(p.title)}</span><a href="${BLOG_PREFIX}${esc(p.slug)}" target="_blank" class="slug-link">${esc(p.slug)}</a></li>`;
+                const badge = p.liveStatus === true ? '<span class="post-status status-live">Live</span>' : 
+                              p.liveStatus === false ? '<span class="post-status status-404">404</span>' : '';
+                html += `<li><span class="modal-post-title">${esc(p.title)} ${badge}</span><a href="${BLOG_PREFIX}${esc(p.slug)}" target="_blank" class="slug-link">${esc(p.slug)}</a></li>`;
             });
             html += `</ul>`;
         }
@@ -527,7 +534,9 @@
         if (secondaryPosts.length > 0) {
             html += `<h4 style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin:20px 0 8px;">Secondary Posts</h4><ul class="modal-post-list">`;
             secondaryPosts.forEach(p => {
-                html += `<li><span class="modal-post-title">${esc(p.title)} <span style="font-size:0.7rem; color:var(--text-muted)">(Primary: ${esc(p.primaryCategory)})</span></span><a href="${BLOG_PREFIX}${esc(p.slug)}" target="_blank" class="slug-link">${esc(p.slug)}</a></li>`;
+                const badge = p.liveStatus === true ? '<span class="post-status status-live">Live</span>' : 
+                              p.liveStatus === false ? '<span class="post-status status-404">404</span>' : '';
+                html += `<li><span class="modal-post-title">${esc(p.title)} ${badge} <span style="font-size:0.7rem; color:var(--text-muted)">(Primary: ${esc(p.primaryCategory)})</span></span><a href="${BLOG_PREFIX}${esc(p.slug)}" target="_blank" class="slug-link">${esc(p.slug)}</a></li>`;
             });
             html += `</ul>`;
         }
@@ -645,6 +654,8 @@
                     <div class="manage-header">
                         <div>
                             <span class="manage-title">${esc(p.title)}</span>
+                            ${p.liveStatus === true ? '<span class="post-status status-live">Live</span>' : 
+                              p.liveStatus === false ? '<span class="post-status status-404">404</span>' : ''}
                             <span class="manage-slug">/${esc(p.slug)}</span>
                         </div>
                     </div>
@@ -716,6 +727,40 @@
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+    }
+
+    // ───────────────────────────────────────
+    //  API INTEGRATION: STATUS CHECKER
+    // ───────────────────────────────────────
+    async function checkStatuses() {
+        const btn = document.getElementById('btn-check-status');
+        btn.innerHTML = `<span class="spinner" style="width:14px;height:14px;margin:0;border-width:2px;display:inline-block;vertical-align:middle;margin-right:8px;"></span> Checking...`;
+        btn.disabled = true;
+
+        const batchSize = 10;
+        for (let i = 0; i < posts.length; i += batchSize) {
+            const batch = posts.slice(i, i + batchSize);
+            await Promise.all(batch.map(async p => {
+                try {
+                    const url = `${BLOG_PREFIX}${p.slug}`;
+                    const res = await fetch(`/api/check?url=${encodeURIComponent(url)}`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        p.liveStatus = data.status === 200;
+                    } else {
+                        p.liveStatus = false;
+                    }
+                } catch(e) {
+                    p.liveStatus = false;
+                }
+            }));
+            
+            // Re-render UI progressively
+            renderAll();
+        }
+
+        btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Check Status`;
+        btn.disabled = false;
     }
 
     // ───────────────────────────────────────
@@ -841,6 +886,7 @@
 
         // Global Event Listeners for new features
         document.getElementById('btn-export-csv').addEventListener('click', exportCSV);
+        document.getElementById('btn-check-status').addEventListener('click', checkStatuses);
 
         document.getElementById('btn-add-global-category').addEventListener('click', () => {
             const newCat = prompt('Enter name for the new category:');
